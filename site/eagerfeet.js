@@ -76,7 +76,7 @@ function lookup() {
 				html += '<div class="run">';
 				html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date)+'</p>';
 				html += '<p>'+parseFloat(run.distance).toFixed(2)+' mi, ';
-				html += run.calories+' calories, ';
+				html += Math.round(run.calories)+' calories, ';
 				html += terrain[run.terrain]+', '+weather[run.weather]+', '+felt[run.howFelt];
 				html += '</p><p>Comment: <i>'+run.description+'</i></p>';
 				html += '<p><a href="'+run.fileName+'">GPX File</a></p>';
