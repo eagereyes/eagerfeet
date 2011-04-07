@@ -150,7 +150,7 @@ function convertRunData(dirName, userID, runs, index, response) {
 			
 			var filename = dirName + '/Run_' + run.startTime + '.gpx';
 			run.fileName = filename;
-			var stream = fs.createWriteStream(filename, WRITEOPTIONS);
+			var stream = fs.createWriteStream('site/'+filename, WRITEOPTIONS);
 			stream.on('open', function(fd) {
 				stream.write('<?xml version="1.0" encoding="UTF-8"?>', 'utf8');
 				stream.end(builder.toString(), 'utf8');
@@ -213,9 +213,9 @@ function makeUserRunList(userID, response) {
 	
 			var runs = [];
 		
-			var dirName = 'site/data/' + md5Sum(userID + (new Date()).toUTCString());
+			var dirName = 'data/' + md5Sum(userID + (new Date()).toUTCString());
 		
-			fs.mkdir(dirName, 0755, function() {
+			fs.mkdir('site/'+dirName, 0755, function() {
 				for (var i = 0; i < runElements.length; i++) {
 					var run = runElements[i];
 					var r = {

@@ -69,24 +69,25 @@ function lookup() {
 		$('#submit').show();
 		if (data.code == 0) {
 			var runs = $('#runs')[0];
-			var html = "";
+			var html = '';
 			var date = new Date();
 			data.runs.forEach(function(run) {
 				date.setISO8601(run.startTime);
-				html += "<div class=\"run\">";
-				html += "<p><span class=\"title\">Run "+formatDate(date)+"</span>, "+formatTime(date)+"</p>";
-				html += "<p>"+parseFloat(run.distance).toFixed(2)+" mi, ";
-				html += run.calories+" calories, ";
-				html += terrain[run.terrain]+", "+weather[run.weather]+", "+felt[run.howFelt];
-				html += "</p><p>Comment: <i>"+run.description+"</i></p>";
-				html += "</div>\n";
+				html += '<div class="run">';
+				html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date)+'</p>';
+				html += '<p>'+parseFloat(run.distance).toFixed(2)+' mi, ';
+				html += run.calories+' calories, ';
+				html += terrain[run.terrain]+', '+weather[run.weather]+', '+felt[run.howFelt];
+				html += '</p><p>Comment: <i>'+run.description+'</i></p>';
+				html += '<p><a href="'+run.fileName+'">GPX File</a></p>';
+				html += '</div>\n';
 			});
 			runs.innerHTML = html;
 		} else {
-			$('#runs')[0].innerHTML = "<p class=\"error\">"+data.message+"</p>";
+			$('#runs')[0].innerHTML = '<p class="error">'+data.message+'</p>';
 		}
 	}).error(function() {
-		$('#runs')[0].innerHTML = "<p>Error: Server is down, please try again later.</p>";
+		$('#runs')[0].innerHTML = '<p>Error: Server is down, please try again later.</p>';
 		$('#progress').hide();
 		$('#submit').show();
 	});
