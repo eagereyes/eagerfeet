@@ -45,6 +45,22 @@ Date.prototype.setISO8601 = function(dString){
 	return this;
 };
 
+var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+var felt = ["", ":(", ":|", ":)"];
+
+var terrain = ["", "treadmill", "road", "track"];
+
+var weather = ["", "snow", "rain", "cloudy", "sunny"];
+
+function formatDate(date) {
+	return months[date.getMonth()]+" "+date.getDate()+", "+date.getFullYear();
+}
+
+function formatTime(date) {
+	return date.getHours() + ":" + date.getMinutes();
+}
+
 function lookup() {
 	$('#progress').show();
 	$('#submit').hide();
@@ -53,18 +69,26 @@ function lookup() {
 		$('#submit').show();
 		if (data.code == 0) {
 			var runs = $('#runs')[0];
-			runs.innerHTML = "";
+			var html = "";
 			var date = new Date();
 			data.runs.forEach(function(run) {
-				runs.innerHTML += "<p>"+date.setISO8601(run.startTime)+", "+parseFloat(run.distance).toFixed(2)+" mi</p>";
+				date.setISO8601(run.startTime);
+				html += "<div class=\"run\">";
+				html += "<p><span class=\"title\">Run "+formatDate(date)+"</span>, "+formatTime(date)+"</p>";
+				html += "<p>"+parseFloat(run.distance).toFixed(2)+" mi, ";
+				html += run.calories+" calories, ";
+				html += terrain[run.terrain]+", "+weather[run.weather]+", "+felt[run.howFelt];
+				html += "</p><p>Comment: <i>"+run.description+"</i></p>";
+				html += "</div>\n";
 			});
+			runs.innerHTML = html;
 		} else {
-			$('#runs')[0].innerHTML = "<p>Error: "+data.message+"</p>";
+			$('#runs')[0].innerHTML = "<p class=\"error\">"+data.message+"</p>";
 		}
-	})
-	.error(function() {
+	}).error(function() {
 		$('#runs')[0].innerHTML = "<p>Error: Server is down, please try again later.</p>";
 		$('#progress').hide();
 		$('#submit').show();
 	});
+	return false;
 }
