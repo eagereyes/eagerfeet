@@ -1,5 +1,5 @@
 /eagerfeet.esproj
 .DS_Store
-api/data/*
-api/eagerfeet-log.txt
+/site/data
+/eagerfeet-log.txt
 

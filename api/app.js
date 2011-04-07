@@ -18,6 +18,7 @@ var http = require('http');
 var libxml = require('libxmljs');
 var fs = require('fs');
 var crypto = require('crypto');
+var express = require('express');
 
 var RUNLISTSERVER = 'nikerunning.nike.com';
 
@@ -92,7 +93,7 @@ function md5Sum(string) {
 	return md5.digest('hex');
 }
 
-function convertRunData(dirName, userID, runs, index) {
+function convertRunData(dirName, userID, runs, index, response) {
 	var run = runs[index];
 	serverRequest(RUNDATAPATH + run.id, function(body) {
 		runData = JSON.parse(body);
@@ -155,16 +156,20 @@ function convertRunData(dirName, userID, runs, index) {
 				console.log(filename);
 			});
 			stream.on('close', function() {
-				logFile.write(md5Sum(userID+':'+run.id) + ',' + ISODateString(new Date()) + ',' +
-					((bounds.minlat+bounds.maxlat)/2).toFixed(2) + ',' +
-					((bounds.minlon+bounds.maxlon)/2).toFixed(2) + '\n');
+				run.lat = (bounds.minlat+bounds.maxlat)/2;
+				run.lon = (bounds.minlon+bounds.maxlon)/2;
+				delete run.id;
+				logFile.write(md5Sum(userID+':'+run.id) + ',' +
+					ISODateString(new Date()) + ',' +
+					run.lat.toFixed(2) + ',' + run.lon.toFixed(2) + '\n');
 				var allDone = true;
 				runs.forEach(function(r) {
 					allDone = allDone & r.fileName != null;
 				});
 				if (allDone) {
-					runs.forEach(function(r) {
-						console.log(r.id);
+					response.send({
+						code: 0,
+						runs: runs
 					});
 				}
 				setTimeout(function() {
@@ -181,7 +186,7 @@ function convertRunData(dirName, userID, runs, index) {
 	});
 }
 
-function makeUserRunList(userID) {
+function makeUserRunList(userID, response) {
 	serverRequest(RUNLISTPATH + userID, function (body) {
 	//    console.log('BODY: ' + body);
 	
@@ -194,7 +199,7 @@ function makeUserRunList(userID) {
 
 		var runs = [];
 	
-		var dirName = 'data/' + md5Sum(userID + (new Date()).toUTCString());
+		var dirName = 'site/data/' + md5Sum(userID + (new Date()).toUTCString());
 	
 		fs.mkdir(dirName, 0766, function() {
 			for (var i = 0; i < runElements.length; i++) {
@@ -214,7 +219,7 @@ function makeUserRunList(userID) {
 				(function(index) {
 					process.nextTick(function() {
 		//		    	console.log(run.id+' at '+run.startTime+': '+run.description);
-						convertRunData(dirName, userID, runs, index);
+						convertRunData(dirName, userID, runs, index, response);
 					});
 				})(i);
 			}
@@ -232,4 +237,10 @@ process.on('uncaughtException', function (err) {
 
 logFile = fs.createWriteStream(LOGFILENAME, LOGFILEOPTIONS);
 
-makeUserRunList('138995598');
+var app = express.createServer();
+
+app.get('/api/runs/:userID', function(req, res) {
+	makeUserRunList(req.params.userID, res);
+});
+
+app.listen(5555);
