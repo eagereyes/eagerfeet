@@ -8,6 +8,7 @@ The server is written using [node.js](http://nodejs.org). It requires the follow
 
 * [express](https://github.com/visionmedia/express)
 * [libxmljs](https://github.com/polotek/libxmljs)
+* [xmlbuilder-js](https://github.com/oozcitak/xmlbuilder-js)
 
 ## License
 

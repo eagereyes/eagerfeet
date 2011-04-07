@@ -19,6 +19,7 @@ var libxml = require('libxmljs');
 var fs = require('fs');
 var crypto = require('crypto');
 var express = require('express');
+var builder = require('xmlbuilder');
 
 var RUNLISTSERVER = 'nikerunning.nike.com';
 
@@ -73,14 +74,6 @@ function serverRequest(path, resultFunc) {
 	});
 }
 
-var gpxAttrs = {
-	'version':   '1.1',
-	'creator':   'http://eagerfeet.org/',
-	'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-	'xmlns':     'http://www.topografix.com/GPX/1/1',
-	'xsi:schemaLocation': 'http://www.topografix.com/GPX/1/1 http://www.topografix.com/gpx/1/1/gpx.xsd'
-}
-
 var WRITEOPTIONS = {
 	flags: 'w',
 	encoding: 'utf8',
@@ -98,10 +91,15 @@ function convertRunData(dirName, userID, runs, index, response) {
 	serverRequest(RUNDATAPATH + run.id, function(body) {
 		runData = JSON.parse(body);
 		if (runData.plusService.status == 'success') {
-			var doc = new libxml.Document();
-			var gpxNode = doc.node('gpx', gpxAttrs);
-			var metadata = gpxNode.node('metadata');
-			metadata.node('name', {}, 'Run '+run.id+', '+run.startTime);
+			var gpxNode = builder.begin('gpx');
+			gpxNode.att('version', '1.1');
+			gpxNode.att('creator', 'http://eagerfeet.org/');
+			gpxNode.att('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+			gpxNode.att('xmlns', 'http://www.topografix.com/GPX/1/1');
+			gpxNode.att('xsi:schemaLocation', 'http://www.topografix.com/GPX/1/1 http://www.topografix.com/gpx/1/1/gpx.xsd');
+			
+			var metadata = gpxNode.ele('metadata');
+			metadata.ele('name').txt('Run '+run.id+', '+run.startTime);
 			
 			var bounds = {
 				minlat:  100000,
@@ -124,35 +122,38 @@ function convertRunData(dirName, userID, runs, index, response) {
 					bounds.maxlat = waypoint.lat;
 			});
 			
-			metadata.node('bounds', bounds);
+			var b = metadata.ele('bounds');
+			b.att('minlat', bounds.minlat);
+			b.att('maxlat', bounds.maxlat);
+			b.att('minlon', bounds.minlon);
+			b.att('maxlon', bounds.maxlon);
 			
-			var trk = gpxNode.node('trk');
+			var trk = gpxNode.ele('trk');
 			
-			trk.node('name', {}, 'Run '+run.id+', '+run.startTime);
-			trk.node('time', {}, run.startTime);
-			trk.node('type', {}, 'Run');
+			trk.ele('name').txt('Run '+run.id+', '+run.startTime);
+			trk.ele('time').txt(run.startTime);
+			trk.ele('type').txt('Run');
 			
-			var trkSeg = trk.node('trkseg');
+			var trkSeg = trk.ele('trkseg');
 			
 			waypoints.forEach(function(waypoint) {
-				var coords = {
-					'lat': waypoint.lat,
-					'lon': waypoint.lon
-				}
 				
-				var trkPt = trkSeg.node('trkpt', coords);
+				var trkPt = trkSeg.ele('trkpt');
+				trkPt.att('lat', waypoint.lat);
+				trkPt.att('lon', waypoint.lon);
 				
-				trkPt.node('ele', {}, waypoint.alt);
+				trkPt.ele('ele').txt(waypoint.alt);
 				
 				var time = new Date(waypoint.time);
-				trkPt.node('time', {}, ISODateString(time));
+				trkPt.ele('time').txt(ISODateString(time));
 			});
 			
 			var filename = dirName + '/Run_' + run.startTime + '.gpx';
 			run.fileName = filename;
 			var stream = fs.createWriteStream(filename, WRITEOPTIONS);
 			stream.on('open', function(fd) {
-				stream.end(doc.toString(), 'utf8');
+				stream.write('<?xml version="1.0" encoding="UTF-8"?>', 'utf8');
+				stream.end(builder.toString(), 'utf8');
 				console.log(filename);
 			});
 			stream.on('close', function() {
@@ -175,14 +176,14 @@ function convertRunData(dirName, userID, runs, index, response) {
 						runs: runs
 					});
 				}
-				setTimeout(function() {
-					fs.unlink(filename, function() {
-						console.log(filename+' deleted.');
-						fs.rmdir(dirName, function() {
+//				setTimeout(function() {
+//					fs.unlink(filename, function() {
+//						console.log(filename+' deleted.');
+//						fs.rmdir(dirName, function() {
 							// ignore if there's an error
-						});
-					});
-				}, DELETETIMEOUT);
+//						});
+//					});
+//				}, DELETETIMEOUT);
 //				console.log('closed');
 			});
 		} else {
@@ -214,7 +215,7 @@ function makeUserRunList(userID, response) {
 		
 			var dirName = 'site/data/' + md5Sum(userID + (new Date()).toUTCString());
 		
-			fs.mkdir(dirName, 0766, function() {
+			fs.mkdir(dirName, 0755, function() {
 				for (var i = 0; i < runElements.length; i++) {
 					var run = runElements[i];
 					var r = {
