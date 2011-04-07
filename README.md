@@ -2,6 +2,13 @@
 
 This is the code that powers [eagerfeet.org](http://eagerfeet.org/), a website that extracts run data from Nike+ so that it can be imported into programs like [RunKeeper](http://runkeeper.com/).
 
+## Dependencies
+
+The server is written using [node.js](http://nodejs.org). It requires the following modules:
+
+* [express](https://github.com/visionmedia/express)
+* [libxmljs](https://github.com/polotek/libxmljs)
+
 ## License
 
 This software is released under the [ISC License](http://www.opensource.org/licenses/isc-license), which is practically identical to the better-known MIT License, but uses simpler wording.
