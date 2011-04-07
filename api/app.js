@@ -158,10 +158,13 @@ function convertRunData(dirName, userID, runs, index, response) {
 			stream.on('close', function() {
 				run.lat = (bounds.minlat+bounds.maxlat)/2;
 				run.lon = (bounds.minlon+bounds.maxlon)/2;
-				delete run.id;
+
 				logFile.write(md5Sum(userID+':'+run.id) + ',' +
 					ISODateString(new Date()) + ',' +
 					run.lat.toFixed(2) + ',' + run.lon.toFixed(2) + '\n');
+
+				delete run.id;
+
 				var allDone = true;
 				runs.forEach(function(r) {
 					allDone = allDone & r.fileName != null;

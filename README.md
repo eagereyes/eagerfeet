@@ -1,3 +1,6 @@
+# EagerFeet
+
+This is the code that powers [eagerfeet.org](http://eagerfeet.org/), a website that extracts run data from Nike+ so that it can be imported into programs like [RunKeeper](http://runkeeper.com/).
 
 ## License
 
