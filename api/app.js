@@ -182,6 +182,11 @@ function convertRunData(dirName, userID, runs, index, response) {
 				}, DELETETIMEOUT);
 //				console.log('closed');
 			});
+		} else {
+			response.send({
+				code: -1,
+				message: "Error retrieving data, please try again."
+			});
 		}
 	});
 }
@@ -193,37 +198,43 @@ function makeUserRunList(userID, response) {
 		var runList = libxml.parseXmlString(body);
 		
 		var success = runList.get('/plusService/status').text();
-	//	console.log(success);
+		if (success != "success") {
+			response.send({
+				code: -1,
+				message: "Error: User not found."
+			});
+		} else {
 	    	
-		runElements = runList.find('/plusService/runList/run');
-
-		var runs = [];
+			runElements = runList.find('/plusService/runList/run');
 	
-		var dirName = 'site/data/' + md5Sum(userID + (new Date()).toUTCString());
-	
-		fs.mkdir(dirName, 0766, function() {
-			for (var i = 0; i < runElements.length; i++) {
-				var run = runElements[i];
-				var r = {
-					id:				run.attr('id').value(),
-					startTime:		run.get('startTime').text(),
-					distance:		run.get('distance').text(),
-					calories:		run.get('calories').text(),
-					description:	run.get('description').text(),
-					howFelt:		run.get('howFelt').text(),
-					weather:		run.get('weather').text(),
-					terrain:		run.get('terrain').text(),
-					fileName:		null
+			var runs = [];
+		
+			var dirName = 'site/data/' + md5Sum(userID + (new Date()).toUTCString());
+		
+			fs.mkdir(dirName, 0766, function() {
+				for (var i = 0; i < runElements.length; i++) {
+					var run = runElements[i];
+					var r = {
+						id:				run.attr('id').value(),
+						startTime:		run.get('startTime').text(),
+						distance:		run.get('distance').text(),
+						calories:		run.get('calories').text(),
+						description:	run.get('description').text(),
+						howFelt:		run.get('howFelt').text(),
+						weather:		run.get('weather').text(),
+						terrain:		run.get('terrain').text(),
+						fileName:		null
+					}
+					runs.push(r);
+					(function(index) {
+						process.nextTick(function() {
+			//		    	console.log(run.id+' at '+run.startTime+': '+run.description);
+							convertRunData(dirName, userID, runs, index, response);
+						});
+					})(i);
 				}
-				runs.push(r);
-				(function(index) {
-					process.nextTick(function() {
-		//		    	console.log(run.id+' at '+run.startTime+': '+run.description);
-						convertRunData(dirName, userID, runs, index, response);
-					});
-				})(i);
-			}
-		});
+			});
+		}
 	});
 }
 
