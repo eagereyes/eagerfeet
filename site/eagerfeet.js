@@ -52,11 +52,11 @@ function pad(n) {
 
 var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-var felt = ["", ":(", ":|", ":)"];
+var felt = ["", "Awesome", "So-So", "Sluggish", "Injured"];
 
-var terrain = ["", "treadmill", "road", "track"];
+var terrain = ["", "Road", "Trail", "Treadmill", "Track"];
 
-var weather = ["", "snow", "rain", "cloudy", "sunny"];
+var weather = ["", "Sunny", "Cloudy", "Rainy", "Snowy"];
 
 function formatDate(date) {
 	return months[date.getMonth()]+" "+date.getDate()+", "+date.getFullYear();
@@ -79,12 +79,22 @@ function lookup() {
 			data.runs.forEach(function(run) {
 				date.setISO8601(run.startTime);
 				html += '<div class="run">';
-				html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date)+'</p>';
-				html += '<p>'+parseFloat(run.distance).toFixed(2)+' mi, ';
-				html += Math.round(run.calories)+' calories, ';
-				html += terrain[run.terrain]+', '+weather[run.weather]+', '+felt[run.howFelt];
-				html += '</p><p>Comment: <i>'+run.description+'</i></p>';
-				html += '<p><a href="'+run.fileName+'">GPX File</a></p>';
+				html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date)+' &mdash; ';
+				if (run.fileName == 'none')
+					html += '<i>no GPS data</i></p>';
+				else
+					html += '<a href="'+run.fileName+'">GPX File</a></p>';
+				html += '<p>'+parseFloat(run.distance).toFixed(2)+' mi';
+				if (run.calories > 0)
+					html += ', '+Math.round(run.calories)+' calories';
+				if (run.terrain > 0)
+					html += ', '+terrain[run.terrain];
+				if (run.weather > 0)
+					html += ', '+weather[run.weather];
+				if (run.howFelt > 0)
+					html += ', '+felt[run.howFelt];
+				if (run.description.length > 0)
+					html += '</p><p>Comment: <i>'+run.description+'</i></p>';
 				html += '</div>\n';
 			});
 			runs.innerHTML = html;

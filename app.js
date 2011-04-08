@@ -124,67 +124,90 @@ function md5Sum(string) {
 	return md5.digest('hex');
 }
 
+function json2GPX(waypoints, run) {
+	var gpxNode = builder.begin('gpx');
+	gpxNode.att('version', '1.1');
+	gpxNode.att('creator', 'http://eagerfeet.org/');
+	gpxNode.att('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+	gpxNode.att('xmlns', 'http://www.topografix.com/GPX/1/1');
+	gpxNode.att('xsi:schemaLocation', 'http://www.topografix.com/GPX/1/1 http://www.topografix.com/gpx/1/1/gpx.xsd');
+	
+	var metadata = gpxNode.ele('metadata');
+	metadata.ele('name').txt('Run '+run.id+', '+run.startTime);
+	
+	var bounds = {
+		minlat:  100000,
+		maxlat: -100000,
+		minlon:  100000,
+		maxlon: -100000
+	};
+		
+	waypoints.forEach(function(waypoint) {
+		if (waypoint.lon < bounds.minlon)
+			bounds.minlon = waypoint.lon;
+		if (waypoint.lon > bounds.maxlon)
+			bounds.maxlon = waypoint.lon;
+		
+		if (waypoint.lat < bounds.minlat)
+			bounds.minlat = waypoint.lat;
+		if (waypoint.lat > bounds.maxlat)
+			bounds.maxlat = waypoint.lat;
+	});
+	
+	var b = metadata.ele('bounds');
+	b.att('minlat', bounds.minlat);
+	b.att('maxlat', bounds.maxlat);
+	b.att('minlon', bounds.minlon);
+	b.att('maxlon', bounds.maxlon);
+
+	run.lat = (bounds.minlat+bounds.maxlat)/2;
+	run.lon = (bounds.minlon+bounds.maxlon)/2;
+	
+	var trk = gpxNode.ele('trk');
+	
+	trk.ele('name').txt('Run '+run.id+', '+run.startTime);
+	trk.ele('time').txt(run.startTime);
+	trk.ele('type').txt('Run');
+	
+	var trkSeg = trk.ele('trkseg');
+	
+	waypoints.forEach(function(waypoint) {
+		
+		var trkPt = trkSeg.ele('trkpt');
+		trkPt.att('lat', waypoint.lat);
+		trkPt.att('lon', waypoint.lon);
+		
+		trkPt.ele('ele').txt(waypoint.alt);
+		
+		var time = new Date(waypoint.time);
+		trkPt.ele('time').txt(ISODateString(time));
+	});
+
+	return builder.toString();
+}
+
+function checkComplete(runs, response) {
+	var allDone = true;
+	runs.forEach(function(r) {
+		allDone &= r.fileName != null;
+	});
+	if (allDone) {
+		response.send({
+			code: 0,
+			runs: runs
+		});
+//					console.log('+++ Sending response (success) +++\n');
+	}
+}
+
 function convertRunData(dirName, userID, runs, index, response) {
 	var run = runs[index];
 	serverRequest(RUNDATAPATH + run.id, function(body) {
 		runData = JSON.parse(body);
+		
 		if (runData.plusService.status == 'success') {
-			var gpxNode = builder.begin('gpx');
-			gpxNode.att('version', '1.1');
-			gpxNode.att('creator', 'http://eagerfeet.org/');
-			gpxNode.att('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
-			gpxNode.att('xmlns', 'http://www.topografix.com/GPX/1/1');
-			gpxNode.att('xsi:schemaLocation', 'http://www.topografix.com/GPX/1/1 http://www.topografix.com/gpx/1/1/gpx.xsd');
 			
-			var metadata = gpxNode.ele('metadata');
-			metadata.ele('name').txt('Run '+run.id+', '+run.startTime);
-			
-			var bounds = {
-				minlat:  100000,
-				maxlat: -100000,
-				minlon:  100000,
-				maxlon: -100000
-			};
-			
-			var waypoints = runData.plusService.route.waypointList;
-			
-			waypoints.forEach(function(waypoint) {
-				if (waypoint.lon < bounds.minlon)
-					bounds.minlon = waypoint.lon;
-				if (waypoint.lon > bounds.maxlon)
-					bounds.maxlon = waypoint.lon;
-				
-				if (waypoint.lat < bounds.minlat)
-					bounds.minlat = waypoint.lat;
-				if (waypoint.lat > bounds.maxlat)
-					bounds.maxlat = waypoint.lat;
-			});
-			
-			var b = metadata.ele('bounds');
-			b.att('minlat', bounds.minlat);
-			b.att('maxlat', bounds.maxlat);
-			b.att('minlon', bounds.minlon);
-			b.att('maxlon', bounds.maxlon);
-			
-			var trk = gpxNode.ele('trk');
-			
-			trk.ele('name').txt('Run '+run.id+', '+run.startTime);
-			trk.ele('time').txt(run.startTime);
-			trk.ele('type').txt('Run');
-			
-			var trkSeg = trk.ele('trkseg');
-			
-			waypoints.forEach(function(waypoint) {
-				
-				var trkPt = trkSeg.ele('trkpt');
-				trkPt.att('lat', waypoint.lat);
-				trkPt.att('lon', waypoint.lon);
-				
-				trkPt.ele('ele').txt(waypoint.alt);
-				
-				var time = new Date(waypoint.time);
-				trkPt.ele('time').txt(ISODateString(time));
-			});
+			var gpx = json2GPX(runData.plusService.route.waypointList, run);
 			
 			var runDate = new Date();
 			runDate.setISO8601(run.startTime);
@@ -192,13 +215,10 @@ function convertRunData(dirName, userID, runs, index, response) {
 			var stream = fs.createWriteStream('site/'+filename, WRITEOPTIONS);
 			stream.on('open', function(fd) {
 				stream.write('<?xml version="1.0" encoding="UTF-8"?>', 'utf8');
-				stream.end(builder.toString(), 'utf8');
+				stream.end(gpx, 'utf8');
 				console.log(filename);
 			});
 			stream.on('close', function() {
-				run.lat = (bounds.minlat+bounds.maxlat)/2;
-				run.lon = (bounds.minlon+bounds.maxlon)/2;
-
 				logFile.write(md5Sum(userID+':'+run.id) + ',' +
 					ISODateString(new Date()) + ',' +
 					run.lat.toFixed(2) + ',' + run.lon.toFixed(2) + '\n');
@@ -207,18 +227,13 @@ function convertRunData(dirName, userID, runs, index, response) {
 
 				run.fileName = filename;
 
-				var allDone = true;
-				runs.forEach(function(r) {
-					allDone &= r.fileName != null;
-				});
-				if (allDone) {
-					response.send({
-						code: 0,
-						runs: runs
-					});
-//					console.log('+++ Sending response (success) +++\n');
-				}
+				checkComplete(runs, response);
+
 			});
+		} else if (runData.plusService.status == 'failure') {
+			delete run.id;
+			run.fileName = 'none';
+			checkComplete(runs, response);
 		} else {
 			response.send({
 				code: -1,
