@@ -149,7 +149,6 @@ function convertRunData(dirName, userID, runs, index, response) {
 			});
 			
 			var filename = dirName + '/Run_' + run.startTime + '.gpx';
-			run.fileName = filename;
 			var stream = fs.createWriteStream('site/'+filename, WRITEOPTIONS);
 			stream.on('open', function(fd) {
 				stream.write('<?xml version="1.0" encoding="UTF-8"?>', 'utf8');
@@ -166,15 +165,18 @@ function convertRunData(dirName, userID, runs, index, response) {
 
 				delete run.id;
 
+				run.fileName = filename;
+
 				var allDone = true;
 				runs.forEach(function(r) {
-					allDone = allDone & r.fileName != null;
+					allDone &= r.fileName != null;
 				});
 				if (allDone) {
 					response.send({
 						code: 0,
 						runs: runs
 					});
+					console.log('+++ Sending response (success) +++\n');
 				}
 //				setTimeout(function() {
 //					fs.unlink(filename, function() {
@@ -191,6 +193,7 @@ function convertRunData(dirName, userID, runs, index, response) {
 				code: -1,
 				message: "Error retrieving data, please try again."
 			});
+			console.log('+++ Sending response (error) +++\n');
 		}
 	});
 }
@@ -207,6 +210,7 @@ function makeUserRunList(userID, response) {
 				code: -1,
 				message: "Error: User not found."
 			});
+			console.log('+++ Sending response (success) +++\n');
 		} else {
 	    	
 			runElements = runList.find('/plusService/runList/run');
@@ -230,6 +234,11 @@ function makeUserRunList(userID, response) {
 						fileName:		null
 					}
 					runs.push(r);
+				}
+				// First create list, then run functions on elements.
+				// Prevents functions inside convertRunData from thinking we're done
+				// while we're still building the list.
+				for (var i = 0; i < runElements.length; i++) {
 					(function(index) {
 						process.nextTick(function() {
 			//		    	console.log(run.id+' at '+run.startTime+': '+run.description);
@@ -246,9 +255,9 @@ process.on('exit', function () {
 	logFile.end();
 });
 
-process.on('uncaughtException', function (err) {
-	console.log('Caught exception: ' + err);
-});
+//process.on('uncaughtException', function (err) {
+//	console.log('Caught exception: ' + err);
+//});
 
 logFile = fs.createWriteStream(LOGFILENAME, LOGFILEOPTIONS);
 

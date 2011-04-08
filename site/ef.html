@@ -14,6 +14,7 @@
 				if(event.keyCode == 13)
 					$("#submit").click();
 				event.returnValue = false;
+				return false;
 			});
 		});
 	</script>
@@ -21,7 +22,7 @@
 <body>
 <form >
 <input type="text" name="userID" id="userID" value="" />
-<input type="submit" onclick="lookup(); return false;" id="submit" />
+<input type="submit" onclick="lookup()" id="submit" />
 <span id="progress"><img src="progress-spinner.gif" width="16" height="16"></span>
 </form>
 <div id="runs"></div>
