@@ -27,7 +27,8 @@ var RUNLISTPATH = '/nikeplus/v2/services/app/run_list.jsp?userID=';
 
 var RUNDATAPATH = '/nikeplus/v2/services/app/get_gps_detail.jsp?_plus=true&format=json&id=';
 
-var DELETETIMEOUT = 1500;
+var DELETETIMEOUT = 60000;
+var DELETEFREQUENCY = 10000;
 
 var LOGFILENAME = 'eagerfeet-log.txt'
 
@@ -178,15 +179,6 @@ function convertRunData(dirName, userID, runs, index, response) {
 					});
 					console.log('+++ Sending response (success) +++\n');
 				}
-//				setTimeout(function() {
-//					fs.unlink(filename, function() {
-//						console.log(filename+' deleted.');
-//						fs.rmdir(dirName, function() {
-							// ignore if there's an error
-//						});
-//					});
-//				}, DELETETIMEOUT);
-//				console.log('closed');
 			});
 		} else {
 			response.send({
@@ -200,7 +192,6 @@ function convertRunData(dirName, userID, runs, index, response) {
 
 function makeUserRunList(userID, response) {
 	serverRequest(RUNLISTPATH + userID, function (body) {
-	//    console.log('BODY: ' + body);
 	
 		var runList = libxml.parseXmlString(body);
 		
@@ -210,7 +201,7 @@ function makeUserRunList(userID, response) {
 				code: -1,
 				message: "Error: User not found."
 			});
-			console.log('+++ Sending response (success) +++\n');
+			console.log('+++ Sending response (error) +++\n');
 		} else {
 	    	
 			runElements = runList.find('/plusService/runList/run');
@@ -251,19 +242,41 @@ function makeUserRunList(userID, response) {
 	});
 }
 
+function cleanup() {
+	var now = new Date();
+	fs.readdirSync('site/data').forEach(function(dir) {
+		var dirName = 'site/data/'+dir;
+		if (now-fs.statSync(dirName).ctime > DELETETIMEOUT) {
+			fs.readdirSync(dirName).forEach(function(fileName) {
+				fs.unlink(dirName+'/'+fileName, function() {
+					// ignore
+				});
+			});
+			fs.rmdir(dirName, function() {
+				console.log(dirName+' deleted.');
+			});
+		}
+	});
+	setTimeout(cleanup, DELETEFREQUENCY);	
+}
+
+
 process.on('exit', function () {
 	logFile.end();
 });
 
-//process.on('uncaughtException', function (err) {
-//	console.log('Caught exception: ' + err);
-//});
+process.on('uncaughtException', function (err) {
+	console.log('Caught exception: ' + err);
+});
 
 logFile = fs.createWriteStream(LOGFILENAME, LOGFILEOPTIONS);
+
+cleanup();
 
 var app = express.createServer();
 
 app.get('/api/runs/:userID', function(req, res) {
+	console.log('NEW REQUEST for '+req.params.userID);
 	makeUserRunList(req.params.userID, res);
 });
 
