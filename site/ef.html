@@ -7,22 +7,18 @@
 	<script type="text/javascript">
 		$(document).ready(function() {
 			$('#submit')[0].disabled = true;
-			$("#userID").keyup(function(event){
+			$("#userID").keyup(function(event) {
 				if (window.event)
 					event = window.event;
 				$('#submit')[0].disabled = ($('#userID')[0].value.length == 0);
-				if(event.keyCode == 13)
-					$("#submit").click();
-				event.returnValue = false;
-				return false;
 			});
 		});
 	</script>
 </head>
 <body>
-<form >
+<form onsubmit="lookup(); return false;">
 <input type="text" name="userID" id="userID" value="" />
-<input type="submit" onclick="lookup()" id="submit" />
+<input type="submit" id="submit" />
 <span id="progress"><img src="progress-spinner.gif" width="16" height="16"></span>
 </form>
 <div id="runs"></div>
