@@ -45,6 +45,11 @@ Date.prototype.setISO8601 = function(dString){
 	return this;
 };
 
+// from https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Date
+function pad(n) {
+    return n < 10 ? '0' + n : n;
+}
+
 var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 var felt = ["", ":(", ":|", ":)"];
@@ -58,7 +63,7 @@ function formatDate(date) {
 }
 
 function formatTime(date) {
-	return date.getHours() + ":" + date.getMinutes();
+	return date.getHours() + ":" + pad(date.getMinutes());
 }
 
 function lookup() {
