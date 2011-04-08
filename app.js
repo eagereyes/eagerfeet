@@ -55,6 +55,43 @@ function ISODateString(d) {
     + pad(d.getUTCSeconds())
     + 'Z';
 }
+
+// from http://dansnetwork.com/javascript-iso8601rfc3339-date-parser/
+Date.prototype.setISO8601 = function(dString){
+
+	var regexp = /(\d\d\d\d)(-)?(\d\d)(-)?(\d\d)(T)?(\d\d)(:)?(\d\d)(:)?(\d\d)(\.\d+)?(Z|([+-])(\d\d)(:)?(\d\d))/;
+
+	if (dString.toString().match(new RegExp(regexp))) {
+		var d = dString.match(new RegExp(regexp));
+		var offset = 0;
+		
+		this.setUTCDate(1);
+		this.setUTCFullYear(parseInt(d[1],10));
+		this.setUTCMonth(parseInt(d[3],10) - 1);
+		this.setUTCDate(parseInt(d[5],10));
+		this.setUTCHours(parseInt(d[7],10));
+		this.setUTCMinutes(parseInt(d[9],10));
+		this.setUTCSeconds(parseInt(d[11],10));
+		if (d[12])
+			this.setUTCMilliseconds(parseFloat(d[12]) * 1000);
+		else
+			this.setUTCMilliseconds(0);
+			if (d[13] != 'Z') {
+				offset = (d[15] * 60) + parseInt(d[17],10);
+				offset *= ((d[14] == '-') ? -1 : 1);
+				this.setTime(this.getTime() - offset * 60 * 1000);
+			}
+		} else {
+			this.setTime(Date.parse(dString));
+	}
+	return this;
+};
+
+function fileNameDateString(d) {
+    return d.getUTCFullYear() + '' + pad(d.getUTCMonth() + 1) + '' + pad(d.getUTCDate()) + '-'
+    + pad(d.getUTCHours()) + '' + pad(d.getUTCMinutes()) + '' + pad(d.getUTCSeconds());
+}
+
       
 function serverRequest(path, resultFunc) {
 
@@ -149,7 +186,9 @@ function convertRunData(dirName, userID, runs, index, response) {
 				trkPt.ele('time').txt(ISODateString(time));
 			});
 			
-			var filename = dirName + '/Run_' + run.startTime + '.gpx';
+			var runDate = new Date();
+			runDate.setISO8601(run.startTime);
+			var filename = dirName + '/Run-' + fileNameDateString(runDate) + '.gpx';
 			var stream = fs.createWriteStream('site/'+filename, WRITEOPTIONS);
 			stream.on('open', function(fd) {
 				stream.write('<?xml version="1.0" encoding="UTF-8"?>', 'utf8');
@@ -177,7 +216,7 @@ function convertRunData(dirName, userID, runs, index, response) {
 						code: 0,
 						runs: runs
 					});
-					console.log('+++ Sending response (success) +++\n');
+//					console.log('+++ Sending response (success) +++\n');
 				}
 			});
 		} else {
@@ -185,7 +224,7 @@ function convertRunData(dirName, userID, runs, index, response) {
 				code: -1,
 				message: "Error retrieving data, please try again."
 			});
-			console.log('+++ Sending response (error) +++\n');
+//			console.log('+++ Sending response (error) +++\n');
 		}
 	});
 }
@@ -201,7 +240,7 @@ function makeUserRunList(userID, response) {
 				code: -1,
 				message: "Error: User not found."
 			});
-			console.log('+++ Sending response (error) +++\n');
+//			console.log('+++ Sending response (error) +++\n');
 		} else {
 	    	
 			runElements = runList.find('/plusService/runList/run');
@@ -276,7 +315,7 @@ cleanup();
 var app = express.createServer();
 
 app.get('/api/runs/:userID', function(req, res) {
-	console.log('NEW REQUEST for '+req.params.userID);
+//	console.log('NEW REQUEST for '+req.params.userID);
 	makeUserRunList(req.params.userID, res);
 });
 
