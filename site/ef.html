@@ -10,14 +10,14 @@
 			$("#userID").keyup(function(event) {
 				if (window.event)
 					event = window.event;
-				$('#submit')[0].disabled = ($('#userID')[0].value.length == 0);
+				$('#submit')[0].disabled = ($('#userID')[0].value.match(/(\d+)/) == null);
 			});
 		});
 	</script>
 </head>
 <body>
 <form onsubmit="lookup(); return false;">
-<input type="text" name="userID" id="userID" value="" />
+<input type="text" name="userID" id="userID" value="" size="120"/>
 <input type="submit" id="submit" />
 <span id="progress"><img src="progress-spinner.gif" width="16" height="16"></span>
 </form>

@@ -69,7 +69,8 @@ function formatTime(date) {
 function lookup() {
 	$('#progress').show();
 	$('#submit').hide();
-	$.get('http://eagerfeet.org/api/runs/'+$('#userID')[0].value, function(data) {
+	var userID = $('#userID')[0].value.match(/(\d+)/)[0];
+	$.get('http://eagerfeet.org/api/runs/'+userID, function(data) {
 		$('#progress').hide();
 		$('#submit').show();
 		if (data.code == 0) {
