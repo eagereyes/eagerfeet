@@ -81,7 +81,7 @@ function lookup() {
 				date.setISO8601(run.startTime);
 				html += '<div class="run">';
 				html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date)+' &mdash; ';
-				if (run.fileName == 'none')
+				if (run.fileName.length == 0)
 					html += '<i>no GPS data</i></p>';
 				else
 					html += '<a href="'+run.fileName+'">GPX File</a></p>';

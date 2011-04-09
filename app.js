@@ -196,53 +196,58 @@ function checkComplete(runs, response) {
 			code: 0,
 			runs: runs
 		});
-//					console.log('+++ Sending response (success) +++\n');
 	}
 }
 
 function convertRunData(dirName, userID, runs, index, response) {
 	var run = runs[index];
-	serverRequest(RUNDATAPATH + run.id, function(body) {
-		runData = JSON.parse(body);
-		
-		if (runData.plusService.status == 'success') {
+	if (run.gpxId.length > 0) {
+		serverRequest(RUNDATAPATH + run.id, function(body) {
+			runData = JSON.parse(body);
 			
-			var gpx = json2GPX(runData.plusService.route.waypointList, run);
-			
-			var runDate = new Date();
-			runDate.setISO8601(run.startTime);
-			var filename = dirName + '/Run-' + fileNameDateString(runDate) + '.gpx';
-			var stream = fs.createWriteStream('site/'+filename, WRITEOPTIONS);
-			stream.on('open', function(fd) {
-				stream.write('<?xml version="1.0" encoding="UTF-8"?>', 'utf8');
-				stream.end(gpx, 'utf8');
-				console.log(filename);
-			});
-			stream.on('close', function() {
-				logFile.write(md5Sum(userID + runs[0].startTime)+','+md5Sum(userID+':'+run.id) + ',' +
-					ISODateString(new Date()) + ',' +
-					run.lat.toFixed(2) + ',' + run.lon.toFixed(2) + '\n');
-
+			if (runData.plusService.status == 'success') {
+				
+				var gpx = json2GPX(runData.plusService.route.waypointList, run);
+				
+				var runDate = new Date();
+				runDate.setISO8601(run.startTime);
+				var filename = dirName + '/Run-' + fileNameDateString(runDate) + '.gpx';
+				var stream = fs.createWriteStream('site/'+filename, WRITEOPTIONS);
+				stream.on('open', function(fd) {
+					stream.write('<?xml version="1.0" encoding="UTF-8"?>', 'utf8');
+					stream.end(gpx, 'utf8');
+					console.log(filename);
+				});
+				stream.on('close', function() {
+					logFile.write(md5Sum(userID + runs[0].startTime)+','+md5Sum(userID+':'+run.id) + ',' +
+						ISODateString(new Date()) + ',' +
+						run.lat.toFixed(2) + ',' + run.lon.toFixed(2) + '\n');
+	
+					delete run.id;
+	
+					run.fileName = filename;
+	
+					checkComplete(runs, response);
+	
+				});
+			} else if (runData.plusService.status == 'failure') {
 				delete run.id;
-
-				run.fileName = filename;
-
+				delete run.gpxId;
+				run.fileName = '';
 				checkComplete(runs, response);
-
-			});
-		} else if (runData.plusService.status == 'failure') {
-			delete run.id;
-			delete run.gpxId;
-			run.fileName = 'none';
-			checkComplete(runs, response);
-		} else {
-			response.send({
-				code: -1,
-				message: "Error retrieving data, please try again."
-			});
-//			console.log('+++ Sending response (error) +++\n');
-		}
-	});
+			} else {
+				response.send({
+					code: -1,
+					message: "Error retrieving data, please try again."
+				});
+			}
+		});
+	} else {
+		delete run.id;
+		delete run.gpxId;
+		run.fileName = '';
+		checkComplete(runs, response);
+	}
 }
 
 function parseXML(xmlString, callback) {
@@ -297,10 +302,10 @@ function parseXML(xmlString, callback) {
 			callback(status, runs);
 		});
 		cb.onWarning(function(msg) {
-			console.log('PARSER WARNING: '+msg);
+//			console.log('PARSER WARNING: '+msg);
 		});
 		cb.onError(function(msg) {
-			cosole.log('PARSER ERROR: '+JSON.stringify(msg));
+//			cosole.log('PARSER ERROR: '+JSON.stringify(msg));
 			callback('failure', runs);
 		});
 	});
@@ -318,7 +323,6 @@ function makeUserRunList(userID, response) {
 					code: -1,
 					message: "Error: User not found."
 				});
-	//			console.log('+++ Sending response (error) +++\n');
 			} else {
 	    	
 				var dirName = 'data/' + md5Sum(userID + (new Date()).toUTCString());
@@ -326,9 +330,7 @@ function makeUserRunList(userID, response) {
 				fs.mkdir('site/'+dirName, 0755, function() {
 					for (var i = 0; i < runs.length; i++) {
 						(function(index) {
-							process.nextTick(function() {
-								convertRunData(dirName, userID, runs, index, response);
-							});
+							convertRunData(dirName, userID, runs, index, response);
 						})(i);
 					}
 				});
