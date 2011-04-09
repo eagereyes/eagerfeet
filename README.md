@@ -7,7 +7,7 @@ This is the code that powers [eagerfeet.org](http://eagerfeet.org/), a website t
 The server is written using [node.js](http://nodejs.org). It requires the following modules:
 
 * [express](https://github.com/visionmedia/express)
-* [libxmljs](https://github.com/polotek/libxmljs)
+* [node-xml](https://github.com/robrighter/node-xml)
 * [xmlbuilder-js](https://github.com/oozcitak/xmlbuilder-js)
 
 ## License

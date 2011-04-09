@@ -15,11 +15,11 @@
 */
 
 var http = require('http');
-var libxml = require('libxmljs');
 var fs = require('fs');
 var crypto = require('crypto');
 var express = require('express');
 var builder = require('xmlbuilder');
+var xml = require("node-xml");
 
 var RUNLISTSERVER = 'nikerunning.nike.com';
 
@@ -232,6 +232,7 @@ function convertRunData(dirName, userID, runs, index, response) {
 			});
 		} else if (runData.plusService.status == 'failure') {
 			delete run.id;
+			delete run.gpxId;
 			run.fileName = 'none';
 			checkComplete(runs, response);
 		} else {
@@ -244,57 +245,95 @@ function convertRunData(dirName, userID, runs, index, response) {
 	});
 }
 
+function parseXML(xmlString, callback) {
+
+	var status = '';
+	var runs = [];
+
+	var enclosingElement = '';
+
+	var currentRun = null;
+
+	var parser = new xml.SaxParser(function(cb) {
+		cb.onStartElementNS(function(elem, attrs, prefix, uri, namespaces) {
+			enclosingElement = elem;
+			if (elem == 'run') {
+				currentRun = {
+					id:				attrs[0][1],
+					startTime:		'',
+					distance:		'',
+					calories:		'',
+					description:	'',
+					howFelt:		'',
+					weather:		'',
+					terrain:		'',
+					gpxId:			'',
+					fileName:		null
+				};
+				runs.push(currentRun);
+			}
+		});
+		cb.onCharacters(function(chars) {
+			if (enclosingElement == 'startTime')
+				currentRun.startTime += chars;
+			else if (enclosingElement == 'distance')
+				currentRun.distance += chars;
+			else if (enclosingElement == 'calories')
+				currentRun.calories += chars;
+			else if (enclosingElement == 'description')
+				currentRun.description += chars;
+			else if (enclosingElement == 'howFelt')
+				currentRun.howFelt += chars;
+			else if (enclosingElement == 'weather')
+				currentRun.weather += chars;
+			else if (enclosingElement == 'terrain')
+				currentRun.terrain += chars;
+			else if (enclosingElement == 'gpxId')
+				currentRun.gpxId += chars;
+			else if (enclosingElement == 'status')
+				status += chars;
+		});
+		cb.onEndDocument(function() {
+			callback(status, runs);
+		});
+		cb.onWarning(function(msg) {
+			console.log('PARSER WARNING: '+msg);
+		});
+		cb.onError(function(msg) {
+			cosole.log('PARSER ERROR: '+JSON.stringify(msg));
+			callback('failure', runs);
+		});
+	});
+	
+	parser.parseString(xmlString);
+}
+
 function makeUserRunList(userID, response) {
 	serverRequest(RUNLISTPATH + userID, function (body) {
 	
-//		var d = new Date();
-		var runList = libxml.parseXmlString(body);
-//		console.log(((new Date())-d)+'ms for XML parsing');
-		
-		var success = runList.get('/plusService/status').text();
-		if (success != "success") {
-			response.send({
-				code: -1,
-				message: "Error: User not found."
-			});
-//			console.log('+++ Sending response (error) +++\n');
-		} else {
+		parseXML(body, function(status, runs) {
+			
+			if (status != "success") {
+				response.send({
+					code: -1,
+					message: "Error: User not found."
+				});
+	//			console.log('+++ Sending response (error) +++\n');
+			} else {
 	    	
-			runElements = runList.find('/plusService/runList/run');
-	
-			var runs = [];
-		
-			var dirName = 'data/' + md5Sum(userID + (new Date()).toUTCString());
-		
-			fs.mkdir('site/'+dirName, 0755, function() {
-				for (var i = 0; i < runElements.length; i++) {
-					var run = runElements[i];
-					var r = {
-						id:				run.attr('id').value(),
-						startTime:		run.get('startTime').text(),
-						distance:		run.get('distance').text(),
-						calories:		run.get('calories').text(),
-						description:	run.get('description').text(),
-						howFelt:		run.get('howFelt').text(),
-						weather:		run.get('weather').text(),
-						terrain:		run.get('terrain').text(),
-						fileName:		null
+				var dirName = 'data/' + md5Sum(userID + (new Date()).toUTCString());
+			
+				fs.mkdir('site/'+dirName, 0755, function() {
+					for (var i = 0; i < runs.length; i++) {
+						(function(index) {
+							process.nextTick(function() {
+								convertRunData(dirName, userID, runs, index, response);
+							});
+						})(i);
 					}
-					runs.push(r);
-				}
-				// First create list, then run functions on elements.
-				// Prevents functions inside convertRunData from thinking we're done
-				// while we're still building the list.
-				for (var i = 0; i < runElements.length; i++) {
-					(function(index) {
-						process.nextTick(function() {
-			//		    	console.log(run.id+' at '+run.startTime+': '+run.description);
-							convertRunData(dirName, userID, runs, index, response);
-						});
-					})(i);
-				}
-			});
-		}
+				});
+			}
+		});
 	});
 }
 
