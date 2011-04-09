@@ -219,7 +219,7 @@ function convertRunData(dirName, userID, runs, index, response) {
 				console.log(filename);
 			});
 			stream.on('close', function() {
-				logFile.write(md5Sum(userID+':'+run.id) + ',' +
+				logFile.write(md5Sum(userID + runs[0].startTime)+','+md5Sum(userID+':'+run.id) + ',' +
 					ISODateString(new Date()) + ',' +
 					run.lat.toFixed(2) + ',' + run.lon.toFixed(2) + '\n');
 
@@ -247,7 +247,9 @@ function convertRunData(dirName, userID, runs, index, response) {
 function makeUserRunList(userID, response) {
 	serverRequest(RUNLISTPATH + userID, function (body) {
 	
+//		var d = new Date();
 		var runList = libxml.parseXmlString(body);
+//		console.log(((new Date())-d)+'ms for XML parsing');
 		
 		var success = runList.get('/plusService/status').text();
 		if (success != "success") {
