@@ -103,7 +103,7 @@ function lookup() {
 			$('#runs')[0].innerHTML = '<p class="error">'+data.message+'</p>';
 		}
 	}).error(function() {
-		$('#runs')[0].innerHTML = '<p class="error">Error: Server is down, please try again later.</p>';
+		$('#runs')[0].innerHTML = '<p class="error">Error: Server is down, please try again in a few minutes.</p>';
 		$('#progress').hide();
 		$('#submit').show();
 	});
