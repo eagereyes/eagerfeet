@@ -186,7 +186,7 @@ function json2GPX(waypoints, run) {
 	return builder.toString();
 }
 
-function checkComplete(runs, response, userID) {
+function checkComplete(runs, response, userID, startTime) {
 	var allDone = true;
 	runs.forEach(function(r) {
 		allDone &= r.fileName != null;
@@ -196,11 +196,11 @@ function checkComplete(runs, response, userID) {
 			code: 0,
 			runs: runs
 		});
-		console.log('All done for '+userID);
+		console.log('All done for '+userID+' after '+((new Date())-startTime)+'ms');
 	}
 }
 
-function convertRunData(dirName, userID, runs, index, response) {
+function convertRunData(dirName, userID, runs, index, response, startTime) {
 	var run = runs[index];
 	if (run.gpxId.length > 0) {
 		serverRequest(RUNDATAPATH + run.id, function(body) {
@@ -228,26 +228,27 @@ function convertRunData(dirName, userID, runs, index, response) {
 	
 					run.fileName = filename;
 	
-					checkComplete(runs, response, userID);
+					checkComplete(runs, response, userID, startTime);
 	
 				});
 			} else if (runData.plusService.status == 'failure') {
 				delete run.id;
 				delete run.gpxId;
 				run.fileName = '';
-				checkComplete(runs, response);
+				checkComplete(runs, response, userID, startTime);
 			} else {
 				response.send({
 					code: -1,
 					message: "Error retrieving data, please try again."
 				});
+				console.log('Error getting data for '+userID);
 			}
 		});
 	} else {
 		delete run.id;
 		delete run.gpxId;
 		run.fileName = '';
-		checkComplete(runs, response);
+		checkComplete(runs, response, userID, startTime);
 	}
 }
 
@@ -314,7 +315,7 @@ function parseXML(xmlString, callback) {
 	parser.parseString(xmlString);
 }
 
-function makeUserRunList(userID, response) {
+function makeUserRunList(userID, response, startTime) {
 	serverRequest(RUNLISTPATH + userID, function (body) {
 	
 		parseXML(body, function(status, runs) {
@@ -331,7 +332,7 @@ function makeUserRunList(userID, response) {
 				fs.mkdir('site/'+dirName, 0755, function() {
 					for (var i = 0; i < runs.length; i++) {
 						(function(index) {
-							convertRunData(dirName, userID, runs, index, response);
+							convertRunData(dirName, userID, runs, index, response, startTime);
 						})(i);
 					}
 				});
@@ -375,7 +376,7 @@ var app = express.createServer();
 
 app.get('/api/runs/:userID', function(req, res) {
 	console.log('NEW REQUEST for '+req.params.userID);
-	makeUserRunList(req.params.userID, res);
+	makeUserRunList(req.params.userID, res, new Date());
 });
 
 app.get('/api/ping', function(req, res) {
