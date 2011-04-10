@@ -2,5 +2,5 @@
 .DS_Store
 /site/data/*
 /eagerfeet-log.txt
-testdata.txt
-
+test/testdata.txt
+site/eagerfeet-header.*

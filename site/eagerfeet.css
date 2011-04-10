@@ -20,5 +20,47 @@ span.title {
 }
 
 p {
-	margin: 2px;
+	margin: 0 2px 5px;
+}
+
+div#header {
+	height: 150px;
+	margin-bottom: 20px;
+}
+
+p.error {
+	background-color: #ffe5e6;
+	color: #ff1e17;
+	padding: 5px;
+	border-color: #ff1e17;
+	border-style: solid;
+}
+
+div#sidebar {
+	float: right;
+	width: 350px;
+	background-color: #e0effd;
+	padding: 3px;
+	margin-top: 40px;
+}
+
+h2 {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+div#main {
+	width: 960px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+form {
+	height: 25px;
+	margin-bottom: 15px;
+}
+
+div#list {
+	float: left;
+	width: 590px;
 }

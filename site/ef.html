@@ -16,11 +16,32 @@
 	</script>
 </head>
 <body>
-<form onsubmit="lookup(); return false;">
-<input type="text" name="userID" id="userID" value="" size="120"/>
-<input type="submit" id="submit" />
-<span id="progress"><img src="progress-spinner.gif" width="16" height="16"></span>
-</form>
-<div id="runs"></div>
+<div id="main">
+	<div id="header"><img src="eagerfeet-header.png" width="960" height="150"</div>
+	<div id="list">
+		<form onsubmit="lookup(); return false;">
+			<input type="text" name="userID" id="userID" value="" size="90"/>
+			<input type="submit" id="submit" />
+			<span id="progress"><img src="progress-spinner.gif" width="16" height="16"></span>
+		</form>
+	<div id="runs"></div>
+	</div>
+	<div id="sidebar">
+	<h2>About</h2>
+	<p>This website lets you export your run data from Nike+. Log into your account on <a href="http://nikerunning.nike.com/">the Nike+ website</a>, and click on one particular run. Copy the URL from your brower's URL bar, paste it into the input box on the left, and click <i>Submit</i></p>
+	
+	<h2>Why?</h2>
+	<p>Nike+ and the Nike iPhone app are a nice starting point, but they become limiting quite soon. Nike's website is also slow and tedious to use. Better services exist, but without the ability to take your data with you they are not as appealing. This website was created to change that and to give you control over your own data.</p>
+	
+	<h2>How?</h2>
+	<p>Use this website to export your run data as GPX files. You can then import them into your favorite software or website (like <a href="http://runkeeper.com/" target="_blank">RunKeeper</a>).</p>
+	
+	<h2>Privacy</h2>
+	<p>This service accesses your private run data, including the location data of your runs. We store your data for a short time (10 minutes) so you can download it. Your user ID is only kept in memory, and never stored on disk in plain text.</p>
+	
+	<h2>Source Code</h2>
+	<p>The source code of this website and the service behind it <a href="https://github.com/eagereyes/eagerfeet">is available on github</a>.</p>
+	</div>
+</div>
 </body>
 </html>
