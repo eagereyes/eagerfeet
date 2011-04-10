@@ -69,43 +69,50 @@ function formatTime(date) {
 function lookup() {
 	$('#progress').show();
 	$('#submit').hide();
-	var userID = $('#userID')[0].value.match(/(\d+)/)[0];
-	$.get('http://eagerfeet.org/api/runs/'+userID, function(data) {
+	var match = $('#userID')[0].value.match(/(\d+)/);
+	if (match != null) {
+		var userID = match[0];
+		$.get('http://eagerfeet.org/api/runs/'+userID, function(data) {
+			$('#progress').hide();
+			$('#submit').show();
+			if (data.code == 0) {
+				var runs = $('#runs')[0];
+				var html = '<p>Found '+data.runs.length+' runs.</p>';
+				var date = new Date();
+				data.runs.forEach(function(run) {
+					date.setISO8601(run.startTime);
+					html += '<div class="run">';
+					html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date)+' &mdash; ';
+					if (run.fileName.length == 0)
+						html += '<i>no GPS data</i></p>';
+					else
+						html += '<a href="'+run.fileName+'">GPX File</a></p>';
+					html += '<p>'+parseFloat(run.distance).toFixed(2)+' mi';
+					if (run.calories > 0)
+						html += ', '+Math.round(run.calories)+' calories';
+					if (run.terrain > 0)
+						html += ', '+terrain[run.terrain];
+					if (run.weather > 0)
+						html += ', '+weather[run.weather];
+					if (run.howFelt > 0)
+						html += ', '+felt[run.howFelt];
+					if (run.description.length > 0)
+						html += '</p><p>Comment: <i>'+run.description+'</i></p>';
+					html += '</div>\n';
+				});
+				runs.innerHTML = html;
+			} else {
+				$('#runs')[0].innerHTML = '<p class="error">'+data.message+'</p>';
+			}
+		}).error(function() {
+			$('#runs')[0].innerHTML = '<p class="error">Error: Server is down, please try again in a few minutes.</p>';
+			$('#progress').hide();
+			$('#submit').show();
+		});
+	} else {
+		$('#runs')[0].innerHTML = '<p class="error">Error: Please enter your <b>numeric</b> user ID. See the sidebar on the right for instructions.</p>';
 		$('#progress').hide();
 		$('#submit').show();
-		if (data.code == 0) {
-			var runs = $('#runs')[0];
-			var html = '<p>Found '+data.runs.length+' runs.</p>';
-			var date = new Date();
-			data.runs.forEach(function(run) {
-				date.setISO8601(run.startTime);
-				html += '<div class="run">';
-				html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date)+' &mdash; ';
-				if (run.fileName.length == 0)
-					html += '<i>no GPS data</i></p>';
-				else
-					html += '<a href="'+run.fileName+'">GPX File</a></p>';
-				html += '<p>'+parseFloat(run.distance).toFixed(2)+' mi';
-				if (run.calories > 0)
-					html += ', '+Math.round(run.calories)+' calories';
-				if (run.terrain > 0)
-					html += ', '+terrain[run.terrain];
-				if (run.weather > 0)
-					html += ', '+weather[run.weather];
-				if (run.howFelt > 0)
-					html += ', '+felt[run.howFelt];
-				if (run.description.length > 0)
-					html += '</p><p>Comment: <i>'+run.description+'</i></p>';
-				html += '</div>\n';
-			});
-			runs.innerHTML = html;
-		} else {
-			$('#runs')[0].innerHTML = '<p class="error">'+data.message+'</p>';
-		}
-	}).error(function() {
-		$('#runs')[0].innerHTML = '<p class="error">Error: Server is down, please try again in a few minutes.</p>';
-		$('#progress').hide();
-		$('#submit').show();
-	});
+	}
 	return false;
 }

@@ -6,13 +6,7 @@
 	<link rel="stylesheet" type="text/css" href="eagerfeet.css"/>
 	<script type="text/javascript">
 		$(document).ready(function() {
-			$('#submit')[0].disabled = true;
 			$('#email').attr('href', 'mailto:'+window.location.hostname.slice(0,-4)+'@me.com');
-			$("#userID").keyup(function(event) {
-				if (window.event)
-					event = window.event;
-				$('#submit')[0].disabled = ($('#userID')[0].value.match(/(\d+)/) == null);
-			});
 		});
 	</script>
 </head>
@@ -21,6 +15,7 @@
 	<div id="header"><a href="http://eagerfeet.org/"><img src="eagerfeet-header.png" width="960" height="150"></a></div>
 	<div id="list">
 		<form onsubmit="lookup(); return false;">
+			<p>Enter your <b>numeric</b> Nike+ ID (or a URL containing it):</p>
 			<input type="text" name="userID" id="userID" value="" size="90"/>
 			<input type="submit" id="submit" />
 			<span id="progress"><img src="progress-spinner.gif" width="16" height="16"></span>
@@ -28,8 +23,8 @@
 		<div id="runs"></div>
 	</div>
 	<div id="sidebar">
-	<h2>About</h2>
-	<p>This website lets you export your run data from Nike+. Log into your account on the <a href="http://nikerunning.nike.com/" target="_blank">Nike+ website</a>, and click on one particular run. Copy the URL from your browser's URL bar, paste it into the input box on the left, and click <i>Submit</i>.</p>
+	<h2>Instructions</h2>
+	<p>This website lets you export your run data from Nike+ using your <b>numeric</b> user ID. Log into your account on the <a href="http://nikerunning.nike.com/" target="_blank">Nike+ website</a>, and click on one particular run. Then copy the URL from your browser's URL bar and paste it into the input box on the left, and click <i>Submit</i>. Make sure that the URL contains a number with eight to ten digits.</p>
 	<p>Once all your runs are loaded, you can download the run data by clicking on the <i>GPX Data</i> links where available. Your data is only stored for 20 minutes, so either download it right away or try again if you get error messages about the files not being found.</p>
 	
 	<h2>Why?</h2>
