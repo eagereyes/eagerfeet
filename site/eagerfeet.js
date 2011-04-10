@@ -75,7 +75,7 @@ function lookup() {
 		$('#submit').show();
 		if (data.code == 0) {
 			var runs = $('#runs')[0];
-			var html = '';
+			var html = '<p>Found '+data.runs.length+' runs.</p>';
 			var date = new Date();
 			data.runs.forEach(function(run) {
 				date.setISO8601(run.startTime);

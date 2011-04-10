@@ -25,42 +25,51 @@ p {
 
 div#header {
 	height: 150px;
-	margin-bottom: 20px;
+	margin-bottom: 10px;
+	margin-top: 10px;
 }
 
 p.error {
 	background-color: #ffe5e6;
 	color: #ff1e17;
-	padding: 5px;
+	padding: 10px;
 	border-color: #ff1e17;
 	border-style: solid;
 }
 
 div#sidebar {
 	float: right;
-	width: 350px;
+	width: 370px;
 	background-color: #e0effd;
-	padding: 3px;
-	margin-top: 40px;
+	padding: 5px;
+	margin: 0 0 10px;
 }
 
 h2 {
-	margin-top: 0;
-	margin-bottom: 0;
+	margin: 0 2px;
 }
 
 div#main {
 	width: 960px;
 	margin-right: auto;
 	margin-left: auto;
+	padding: 0;
 }
 
 form {
 	height: 25px;
 	margin-bottom: 15px;
+	margin-top: 5px;
 }
 
 div#list {
 	float: left;
-	width: 590px;
+	width: 560px;
+	margin: 0;
+}
+
+div#eagereyes {
+	width: 360px;
+	height: 70px;
+	margin: 5px auto;
 }

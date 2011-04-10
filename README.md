@@ -12,7 +12,11 @@ The server is written using [node.js](http://nodejs.org). It requires the follow
 
 ## License
 
-This software is released under the [ISC License](http://www.opensource.org/licenses/isc-license), which is practically identical to the better-known MIT License, but uses simpler wording. The only exception is the header image, which contains an item I bought from [iStockphoto](http://www.istockphoto.com/), and which I therefore cannot release.
+This software is released under the [ISC License](http://www.opensource.org/licenses/isc-license), which is practically identical to the better-known MIT License, but uses simpler wording (see below).
+
+The only exception is the header image, which contains an item I bought from [iStockphoto](http://www.istockphoto.com/), and which I therefore cannot release.
+
+Also, please remove the tracking code at the end of the HTML file if you put it up somewhere else.
 
 Copyright (c) 2011, Robert Kosara <rkosara@me.com>
 
