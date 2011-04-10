@@ -378,7 +378,7 @@ app.get('/api/runs/:userID', function(req, res) {
 	makeUserRunList(req.params.userID, res);
 });
 
-app.get('api/ping', function(req, res) {
+app.get('/api/ping', function(req, res) {
 	res.send({code: 0});
 });
 
