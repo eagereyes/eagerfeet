@@ -1,8 +1,60 @@
 <html>
 <head>
-<title>Eager Feet</title>
+<title>Eager Feet :: Export Run Data from Nike+</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js" type="text/javascript"></script>
+	<script src="eagerfeet.js" type="text/javascript"></script>
+	<link rel="stylesheet" type="text/css" href="eagerfeet.css"/>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#submit')[0].disabled = true;
+			$('#email').attr('href', 'mailto:'+window.location.hostname.slice(0,-4)+'@me.com');
+			$("#userID").keyup(function(event) {
+				if (window.event)
+					event = window.event;
+				$('#submit')[0].disabled = ($('#userID')[0].value.match(/(\d+)/) == null);
+			});
+		});
+	</script>
 </head>
 <body>
-Coming soon.
+<div id="main">
+	<div id="header"><img src="eagerfeet-header.png" width="960" height="150"</div>
+	<div id="list">
+		<form onsubmit="lookup(); return false;">
+			<input type="text" name="userID" id="userID" value="" size="90"/>
+			<input type="submit" id="submit" />
+			<span id="progress"><img src="progress-spinner.gif" width="16" height="16"></span>
+		</form>
+		<div id="runs"></div>
+	</div>
+	<div id="sidebar">
+	<h2>About</h2>
+	<p>This website lets you export your run data from Nike+. Log into your account on <a href="http://nikerunning.nike.com/">the Nike+ website</a>, and click on one particular run. Copy the URL from your brower's URL bar, paste it into the input box on the left, and click <i>Submit</i>.</p>
+	<p>Once all your runs are loaded, you can download the run data by clicking on the <i>GPX Data</i> links where available. Your data is only stored for 20 minutes, so either download it right away or try again if you get error messages about the files not being found.</p>
+	
+	<h2>Why?</h2>
+	<p>Nike+ and the Nike iPhone app are a nice starting point, but they become limiting quite soon. Nike's website is also slow and tedious to use. Better services exist, but without the ability to take your data with you they are not as appealing. This website was created to change that and to give you control over your own data.</p>
+	
+	<h2>How?</h2>
+	<p>Use this website to export your run data as GPX files. You can then import them into your favorite software or website (like <a href="http://runkeeper.com/" target="_blank">RunKeeper</a>).</p>
+	
+	<h2>Privacy</h2>
+	<p>This service accesses your private run data, including the location data of your runs. We store your data for a short time (20 minutes) so you can download it. Your user ID is only kept in memory, and never stored on disk in plain text.</p>
+	
+	<h2>Source Code</h2>
+	<p>The source code of this website and the service behind it <a href="https://github.com/eagereyes/eagerfeet">is available on github</a>.</p>
+	
+	<h2>Contact</h2>
+	<p>If you have trouble with the site, please <a id="email">let me know</a>. It would be very helpful if you could include your Nike+ user ID (or the entire URL you pasted in) so I can see what's going on. This is especially true if you have lots of runs (more than 50 or so) or very long runs (longer than 10 miles).</p>
+	<p>This site was created by Robert Kosara and is not affiliated with Nike+ or any of its competitors.</p>
+	<div id="eagereyes"><a href="http://eagereyes.org/" target="_blank"><img src="http://eagereyes.org/themes/feather/images/logo.png" width="360" height="70"></a></div>
+	</div>
+</div>
+
+<!-- Tracking code, please remove if you use this somewhere else! -->
+<script src="//static.getclicky.com/js" type="text/javascript"></script>
+<script type="text/javascript">try{ clicky.init(66409777); }catch(e){}</script>
+<noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/66409777ns.gif" /></p></noscript>
+<!-- End of tracking code -->
 </body>
 </html>

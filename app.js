@@ -186,7 +186,7 @@ function json2GPX(waypoints, run) {
 	return builder.toString();
 }
 
-function checkComplete(runs, response) {
+function checkComplete(runs, response, userID) {
 	var allDone = true;
 	runs.forEach(function(r) {
 		allDone &= r.fileName != null;
@@ -196,6 +196,7 @@ function checkComplete(runs, response) {
 			code: 0,
 			runs: runs
 		});
+		console.log('All done for '+userID);
 	}
 }
 
@@ -216,7 +217,7 @@ function convertRunData(dirName, userID, runs, index, response) {
 				stream.on('open', function(fd) {
 					stream.write('<?xml version="1.0" encoding="UTF-8"?>', 'utf8');
 					stream.end(gpx, 'utf8');
-					console.log(filename);
+//					console.log(filename);
 				});
 				stream.on('close', function() {
 					logFile.write(md5Sum(userID + runs[0].startTime)+','+md5Sum(userID+':'+run.id) + ',' +
@@ -227,7 +228,7 @@ function convertRunData(dirName, userID, runs, index, response) {
 	
 					run.fileName = filename;
 	
-					checkComplete(runs, response);
+					checkComplete(runs, response, userID);
 	
 				});
 			} else if (runData.plusService.status == 'failure') {
