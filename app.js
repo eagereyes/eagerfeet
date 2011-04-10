@@ -27,8 +27,8 @@ var RUNLISTPATH = '/nikeplus/v2/services/app/run_list.jsp?userID=';
 
 var RUNDATAPATH = '/nikeplus/v2/services/app/get_gps_detail.jsp?_plus=true&format=json&id=';
 
-var DELETETIMEOUT = 60000;
-var DELETEFREQUENCY = 10000;
+var DELETETIMEOUT =  20 * 60 * 1000; // files are deleted after 20 minutes
+var DELETEFREQUENCY = 3 * 60 * 1000; // cleanup runs every three minutes
 
 var LOGFILENAME = 'eagerfeet-log.txt'
 
@@ -373,7 +373,7 @@ cleanup();
 var app = express.createServer();
 
 app.get('/api/runs/:userID', function(req, res) {
-//	console.log('NEW REQUEST for '+req.params.userID);
+	console.log('NEW REQUEST for '+req.params.userID);
 	makeUserRunList(req.params.userID, res);
 });
 
