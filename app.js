@@ -192,6 +192,7 @@ function checkComplete(runs, response, userID, startTime) {
 		allDone &= r.fileName != null;
 	});
 	if (allDone) {
+		response.setHeader('Cache-Control', 'no-store');
 		response.send({
 			code: 0,
 			runs: runs
