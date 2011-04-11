@@ -323,8 +323,9 @@ function makeUserRunList(userID, response, startTime) {
 			if (status != "success") {
 				response.send({
 					code: -1,
-					message: "Error: User not found."
+					message: 'Error: User '+userID+' not found.'
 				});
+				console.log('User '+userID+' not found after '+((new Date())-startTime)+'ms');
 			} else {
 	    	
 				var dirName = 'data/' + md5Sum(userID + (new Date()).toUTCString());
