@@ -73,3 +73,10 @@ div#eagereyes {
 	height: 70px;
 	margin: 5px auto;
 }
+
+#tweetbutton {
+	width: 55px;
+	height: 62px;
+	float: right;
+	margin: 5px;
+}
