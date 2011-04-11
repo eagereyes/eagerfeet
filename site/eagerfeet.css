@@ -80,3 +80,7 @@ div#eagereyes {
 	float: right;
 	margin: 5px;
 }
+
+a img {
+	border: none;
+}

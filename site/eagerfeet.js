@@ -79,7 +79,9 @@ function lookup() {
 				var runs = $('#runs')[0];
 				var html = '<p>Found '+data.runs.length+' runs.</p>';
 				var date = new Date();
-				data.runs.forEach(function(run) {
+				// ugly, but IE doesn't support forEach
+				for (var i = 0; i < data.runs.length; i++) {
+					var run = data.runs[i];
 					date.setISO8601(run.startTime);
 					html += '<div class="run">';
 					html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date)+' &mdash; ';
@@ -99,7 +101,7 @@ function lookup() {
 					if (run.description.length > 0)
 						html += '</p><p>Comment: <i>'+run.description+'</i></p>';
 					html += '</div>\n';
-				});
+				}
 				runs.innerHTML = html;
 			} else {
 				$('#runs')[0].innerHTML = '<p class="error">'+data.message+'</p>';
