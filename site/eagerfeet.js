@@ -14,6 +14,8 @@
 	OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+var timeout;
+
 // from http://dansnetwork.com/javascript-iso8601rfc3339-date-parser/
 Date.prototype.setISO8601 = function(dString){
 
@@ -66,6 +68,10 @@ function formatTime(date) {
 	return date.getHours() + ":" + pad(date.getMinutes());
 }
 
+function clearGPXLinks() {
+	$('.gpxlink').html('<i>GPX link expired, please reload.</i>');
+}
+
 function lookup() {
 	$('#progress').show();
 	$('#submit').hide();
@@ -88,7 +94,7 @@ function lookup() {
 					if (run.fileName.length == 0)
 						html += '<i>no GPS data</i></p>';
 					else
-						html += '<a href="'+run.fileName+'">GPX File</a></p>';
+						html += '<span class="gpxlink"><a href="'+run.fileName+'">GPX File</a></span></p>';
 					html += '<p>'+parseFloat(run.distance).toFixed(2)+' mi';
 					if (run.calories > 0)
 						html += ', '+Math.round(run.calories)+' calories';
@@ -103,6 +109,9 @@ function lookup() {
 					html += '</div>\n';
 				}
 				runs.innerHTML = html;
+				if (timeout)
+					clearTimeout(timeout);
+				timeout = setTimeout(clearGPXLinks, 20 * 60 * 1000);
 			} else {
 				$('#runs')[0].innerHTML = '<p class="error">'+data.message+'</p>';
 			}
