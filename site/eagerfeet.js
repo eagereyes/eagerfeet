@@ -74,11 +74,14 @@ function clearGPXLinks() {
 
 function lookup() {
 	// to avoid errors when the clicky tracking code is removed
-	if (typeof(clicky) === 'undefined') {
-		var clicky = {
-			log: function() { }
-		}
-	}
+	// doesn't seem to entirely work though, no more clicks are reported.
+	// for some reason, clicky is undefined here even when it's defined further down.
+	// Some kind of race condition?
+//	if (typeof(clicky) === 'undefined') {
+//		var clicky = {
+//			log: function() { }
+//		}
+//	}
 	$('#progress').show();
 	$('#submit').hide();
 	var match = $('#userID')[0].value.match(/(\d+)/);
