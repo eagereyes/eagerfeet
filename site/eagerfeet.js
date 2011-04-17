@@ -73,6 +73,12 @@ function clearGPXLinks() {
 }
 
 function lookup() {
+	// to avoid errors when the clicky tracking code is removed
+	if (typeof(clicky) === 'undefined') {
+		var clicky = {
+			log: function() { }
+		}
+	}
 	$('#progress').show();
 	$('#submit').hide();
 	var match = $('#userID')[0].value.match(/(\d+)/);
@@ -81,6 +87,7 @@ function lookup() {
 		$.get('http://eagerfeet.org/api/runs/'+userID, function(data) {
 			$('#progress').hide();
 			$('#submit').show();
+			var gpsLinks = 0;
 			if (data.code == 0) {
 				var runs = $('#runs')[0];
 				var html = '<p>Found '+data.runs.length+' runs.</p>';
@@ -93,8 +100,10 @@ function lookup() {
 					html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date)+' &mdash; ';
 					if (run.fileName.length == 0)
 						html += '<i>no GPS data</i></p>';
-					else
+					else {
 						html += '<span class="gpxlink"><a href="'+run.fileName+'">GPX File</a></span></p>';
+						gpsLinks += 1;
+					}
 					html += '<p>'+parseFloat(run.distance).toFixed(2)+' mi';
 					if (run.calories > 0)
 						html += ', '+Math.round(run.calories)+' calories';
@@ -112,18 +121,23 @@ function lookup() {
 				if (timeout)
 					clearTimeout(timeout);
 				timeout = setTimeout(clearGPXLinks, 20 * 60 * 1000);
+				clicky.log('/#success/'+data.runs.length+'/'+gpsLinks,
+					'Success: '+data.runs.length+' runs, '+gpsLinks+' with GPS data');
 			} else {
 				$('#runs')[0].innerHTML = '<p class="error">'+data.message+'</p>';
+				clicky.log('#notfound', 'userID not found');
 			}
 		}).error(function() {
 			$('#runs')[0].innerHTML = '<p class="error">Error: Server is down, please try again in a few minutes.</p>';
 			$('#progress').hide();
 			$('#submit').show();
+			clicky.log('/#serverdown', 'Server down');
 		});
 	} else {
 		$('#runs')[0].innerHTML = '<p class="error">Error: Please enter your <b>numeric</b> user ID. See the sidebar on the right for instructions.</p>';
 		$('#progress').hide();
 		$('#submit').show();
+		clicky.log('/#nomatch', 'No numeric userID in text field');
 	}
 	return false;
 }

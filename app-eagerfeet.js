@@ -197,7 +197,7 @@ function checkComplete(runs, response, userID, startTime) {
 			code: 0,
 			runs: runs
 		});
-		console.log('All done for '+userID+' after '+((new Date())-startTime)+'ms');
+//		console.log('All done for '+userID+' after '+((new Date())-startTime)+'ms');
 	}
 }
 
@@ -242,7 +242,7 @@ function convertRunData(dirName, userID, runs, index, response, startTime) {
 					code: -1,
 					message: "Error retrieving data, please try again."
 				});
-				console.log('Error getting data for '+userID);
+//				console.log('Error getting data for '+userID);
 			}
 		});
 	} else {
@@ -326,7 +326,7 @@ function makeUserRunList(userID, response, startTime) {
 					code: -1,
 					message: 'Error: User '+userID+' not found.'
 				});
-				console.log('User '+userID+' not found after '+((new Date())-startTime)+'ms');
+//				console.log('User '+userID+' not found after '+((new Date())-startTime)+'ms');
 			} else {
 	    	
 				var dirName = 'data/' + md5Sum(userID + (new Date()).toUTCString());
@@ -354,7 +354,7 @@ function cleanup() {
 				});
 			});
 			fs.rmdir(dirName, function() {
-				console.log(dirName+' deleted.');
+//				console.log(dirName+' deleted.');
 			});
 		}
 	});
@@ -377,7 +377,7 @@ cleanup();
 var app = express.createServer();
 
 app.get('/api/runs/:userID', function(req, res) {
-	console.log('NEW REQUEST for '+req.params.userID);
+//	console.log('NEW REQUEST for '+req.params.userID);
 	makeUserRunList(req.params.userID, res, new Date());
 });
 
