@@ -28,17 +28,28 @@
 	<div id="sidebar">
 	<div id="tweetbutton"><a href="http://twitter.com/share" class="twitter-share-button" data-count="vertical" data-via="eagereyes">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script></div>
 	<h2>Instructions</h2>
-	<p>This website lets you export GPS data from Nike+ using your <b>numeric</b> user ID. Log into your account on the <a href="http://nikerunning.nike.com/" target="_blank">Nike+ website</a>, and click on one particular run. Then copy the URL from your browser's URL bar and paste it into the input box on the left, and click <i>Submit</i>. Make sure that the URL contains a number with eight to ten digits.</p>
-	<p>Once all your runs are loaded, you can download the run data by clicking on the <i>GPX Data</i> links where available. Your data is only stored for 20 minutes, so either download it right away or try again if you get error messages about the files not being found.</p>
+	<p>This website lets you export GPS data from Nike+ using your <b>numeric</b> user ID. Here is how you find it:</p>
+	<ol>
+		<li>Log into your account on the <a href="http://nikerunning.nike.com/" target="_blank">Nike+ website</a>.</li>
+		<li>Click on one of your runs.</li>
+		<li>Copy the URL from your browser's URL bar and paste it into the input box on the left.</li>
+		<li>Click <i>Submit</i>.</li>
+	</ol>
+	<p>Make sure that the URL contains a number with eight to ten digits!</p>
+	<p>Once all your runs are loaded, you can download the GPS data by clicking on the <i>GPX Data</i> links where available. Your data is only stored for 20 minutes, so download it right away. You can always click submit again to have the server retrieve a fresh copy of the data.</p>
 	
 	<h2>Why?</h2>
-	<p>Nike+ and the Nike iPhone app are a nice starting point, but they become limiting very quickly. Nike's website is also slow and tedious to use. Better services exist, but without the ability to take your data with you they are not as appealing. EagerFeet was created to change that and to give you control over your own data.</p>
+	<p>Nike+ and the Nike iPhone app are a nice starting point, but they become limiting very quickly. Nike's website is also slow and tedious to use. Better services exist, but without the ability to take your run data with you they are not as appealing. EagerFeet was created to change that by giving you control over your own data.</p>
 	
 	<h2>How?</h2>
 	<p>Use this website to export your run data as <a href="http://en.wikipedia.org/wiki/GPS_eXchange_Format" target="_blank">GPX files</a> (an XML file format for exchanging GPS data). You can then import them into your favorite software or website (like <a href="http://runkeeper.com/" target="_blank">RunKeeper</a>).</p>
 	
+	<h2>Troubleshooting</h2>
+	<p>Nike's servers sometimes throw an error, which the program interprets as the user not being found. If you copied the correct URL and are told that the user does not exist, please just try again.</p>
+	
 	<h2>Privacy</h2>
 	<p>This service accesses your private run data, including the location data of your runs. We store your data for a short time (20 minutes) so you can download it. Your user ID is only kept in memory, and never stored on disk in plain text.</p>
+	<p>To create the map, the program logs the center point of each of your runs to a precision of one tenth of a degree latitude and longitude. This means that you could only be located to within about six miles (ten kilometers). The center is calculated by drawing a box around the entire route of your run, so in most cases it will not even be on the route itself.</p>
 	
 	<h2>Source Code</h2>
 	<p>The source code of this website and the service behind it <a href="https://github.com/eagereyes/eagerfeet">is available on github</a>.</p>

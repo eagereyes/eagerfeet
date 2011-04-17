@@ -218,12 +218,11 @@ function convertRunData(dirName, userID, runs, index, response, startTime) {
 				stream.on('open', function(fd) {
 					stream.write('<?xml version="1.0" encoding="UTF-8"?>', 'utf8');
 					stream.end(gpx, 'utf8');
-//					console.log(filename);
 				});
 				stream.on('close', function() {
 					logFile.write(md5Sum(userID + runs[0].startTime)+','+md5Sum(userID+':'+run.id) + ',' +
 						ISODateString(new Date()) + ',' +
-						run.lat.toFixed(2) + ',' + run.lon.toFixed(2) + '\n');
+						run.lat.toFixed(1) + ',' + run.lon.toFixed(1) + '\n');
 	
 					delete run.id;
 	
@@ -360,8 +359,8 @@ function makeMap(width, height, res) {
 		});
 		lines.sort();
 		lines = lines.filter(function(element, index, array) {
-			return (index == 0) || ((Math.abs(array[index][0]-array[index-1][0]) > .05)
-						&& (Math.abs(array[index][1]-array[index-1][1]) > .05));
+			return (index == 0) || ((Math.abs(array[index][0]-array[index-1][0]) > .1)
+						&& (Math.abs(array[index][1]-array[index-1][1]) > .1));
 		});
 		var url = MAPSBASEURL1+width+'x'+height+MAPSBASEURL2;
 		lines.forEach(function(line) {

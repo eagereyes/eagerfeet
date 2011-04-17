@@ -4,6 +4,10 @@ body {
 	font-family: sans-serif;
 }
 
+li {
+	margin-bottom: 3px;
+}
+
 div.run {
 	background-color: #eaeaea;
 	padding: 3px;
