@@ -288,8 +288,6 @@ function parseXML(xmlString, callback) {
 				currentRun.distance += chars;
 			else if (enclosingElement == 'calories')
 				currentRun.calories += chars;
-			else if (enclosingElement == 'description')
-				currentRun.description += chars;
 			else if (enclosingElement == 'howFelt')
 				currentRun.howFelt += chars;
 			else if (enclosingElement == 'weather')
@@ -303,6 +301,10 @@ function parseXML(xmlString, callback) {
 		});
 		cb.onEndDocument(function() {
 			callback(status, runs);
+		});
+		cb.onCdata(function(cdata) {
+			if (enclosingElement == 'description')
+				currentRun.description += cdata;
 		});
 		cb.onWarning(function(msg) {
 //			console.log('PARSER WARNING: '+msg);
