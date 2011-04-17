@@ -7,6 +7,9 @@
 	<script type="text/javascript">
 		$(document).ready(function() {
 			$('#email').attr('href', 'mailto:'+window.location.hostname.slice(0,-4)+'@me.com');
+			$.get('http://eagerfeet.org/api/mapURL/560/400', function(data) {
+				$('#map').html('<p>Where EagerFeet users are running:</p><img src="'+data+'" width="560" height="400">');
+			});
 		});
 	</script>
 </head>
@@ -20,7 +23,7 @@
 			<input type="submit" id="submit" />
 			<span id="progress"><img src="progress-spinner.gif" width="16" height="16"></span>
 		</form>
-		<div id="runs"></div>
+		<div id="runs"></div><div id="map"></div>
 	</div>
 	<div id="sidebar">
 	<div id="tweetbutton"><a href="http://twitter.com/share" class="twitter-share-button" data-count="vertical" data-via="eagereyes">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script></div>

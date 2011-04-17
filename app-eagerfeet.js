@@ -345,6 +345,33 @@ function makeUserRunList(userID, response, startTime) {
 	});
 }
 
+var MAPSBASEURL1 = 'http://maps.google.com/maps/api/staticmap?size=';
+var MAPSBASEURL2 = '&maptype=roadmap&&markers=icon:http%3A%2F%2Feagerfeet.org%2Fmap-foot.png%7Cshadow:false';
+
+function makeMap(width, height, res) {
+	fs.readFile(LOGFILENAME, 'utf8', function(err, data) {
+		if (err) throw err;
+		var splitLines = data.split('\n');
+		var lines = [];
+		splitLines.forEach(function(line) {
+			var values = line.split(',');
+			if (values.length == 5)
+				lines.push([values[3], values[4]]);
+		});
+		lines.sort();
+		lines = lines.filter(function(element, index, array) {
+			return (index == 0) || ((Math.abs(array[index][0]-array[index-1][0]) > .05)
+						&& (Math.abs(array[index][1]-array[index-1][1]) > .05));
+		});
+		var url = MAPSBASEURL1+width+'x'+height+MAPSBASEURL2;
+		lines.forEach(function(line) {
+			url += '%7C'+line[0]+','+line[1];
+		});
+		url += '&sensor=false';
+		res.send(url);
+	});
+}
+
 function cleanup() {
 	var now = new Date();
 	fs.readdirSync('site/data').forEach(function(dir) {
@@ -369,7 +396,7 @@ process.on('exit', function () {
 });
 
 process.on('uncaughtException', function (err) {
-	console.log('Caught exception: ' + err);
+	console.log((new Date())+' :: Caught exception: ' + err);
 });
 
 logFile = fs.createWriteStream(LOGFILENAME, LOGFILEOPTIONS);
@@ -383,8 +410,12 @@ app.get('/api/runs/:userID', function(req, res) {
 	makeUserRunList(req.params.userID, res, new Date());
 });
 
+app.get('/api/mapUrl/:width/:height', function(req, res) {
+	makeMap(req.params.width, req.params.height, res);
+});
+
 app.get('/api/ping', function(req, res) {
-	res.send({code: 0});
+	res.send('OK');
 });
 
 app.listen(5555);

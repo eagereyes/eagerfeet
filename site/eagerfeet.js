@@ -89,7 +89,6 @@ function lookup() {
 			$('#submit').show();
 			var gpsLinks = 0;
 			if (data.code == 0) {
-				var runs = $('#runs')[0];
 				var html = '<p>Found '+data.runs.length+' runs.</p>';
 				var date = new Date();
 				// ugly, but IE doesn't support forEach
@@ -117,18 +116,19 @@ function lookup() {
 						html += '</p><p>Comment: <i>'+run.description+'</i></p>';
 					html += '</div>\n';
 				}
-				runs.innerHTML = html;
+				$('#runs').html(html);
+				$('#map').hide();
 				if (timeout)
 					clearTimeout(timeout);
 				timeout = setTimeout(clearGPXLinks, 20 * 60 * 1000);
 				clicky.log('/#success/'+data.runs.length+'/'+gpsLinks,
 					'Success: '+data.runs.length+' runs, '+gpsLinks+' with GPS data');
 			} else {
-				$('#runs')[0].innerHTML = '<p class="error">'+data.message+'</p>';
+				$('#runs').html('<p class="error">'+data.message+'</p>');
 				clicky.log('#notfound', 'userID not found');
 			}
 		}).error(function() {
-			$('#runs')[0].innerHTML = '<p class="error">Error: Server is down, please try again in a few minutes.</p>';
+			$('#runs').html('<p class="error">Error: Server is down, please try again in a few minutes.</p>');
 			$('#progress').hide();
 			$('#submit').show();
 			clicky.log('/#serverdown', 'Server down');
