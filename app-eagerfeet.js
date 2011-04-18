@@ -345,7 +345,7 @@ function makeUserRunList(userID, response, startTime) {
 }
 
 var MAPSBASEURL1 = 'http://maps.google.com/maps/api/staticmap?size=';
-var MAPSBASEURL2 = '&maptype=roadmap&&markers=icon:http%3A%2F%2Feagerfeet.org%2Fmap-foot.png%7Cshadow:false';
+var MAPSBASEURL2 = '&maptype=roadmap&&markers=icon:http%3A%2F%2Feagerfeet.org%2Fmapfoot.png%7Cshadow:false';
 
 function makeMap(width, height, res) {
 	fs.readFile(LOGFILENAME, 'utf8', function(err, data) {
