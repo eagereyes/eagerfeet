@@ -237,6 +237,7 @@ function convertRunData(dirName, userID, runs, index, response, startTime) {
 				run.fileName = '';
 				checkComplete(runs, response, userID, startTime);
 			} else {
+				response.setHeader('Cache-Control', 'no-store');
 				response.send({
 					code: -1,
 					message: "Error retrieving data, please try again."
@@ -323,6 +324,7 @@ function makeUserRunList(userID, response, startTime) {
 		parseXML(body, function(status, runs) {
 			
 			if (status != "success") {
+				response.setHeader('Cache-Control', 'no-store');
 				response.send({
 					code: -1,
 					message: 'Error: User '+userID+' not found.'
@@ -347,7 +349,7 @@ function makeUserRunList(userID, response, startTime) {
 var MAPSBASEURL1 = 'http://maps.google.com/maps/api/staticmap?size=';
 var MAPSBASEURL2 = '&maptype=roadmap&&markers=icon:http%3A%2F%2Feagerfeet.org%2Fmapfoot.png%7Cshadow:false';
 
-function makeMap(width, height, res) {
+function makeMap(width, height, response) {
 	fs.readFile(LOGFILENAME, 'utf8', function(err, data) {
 		if (err) throw err;
 		var splitLines = data.split('\n');
@@ -367,7 +369,8 @@ function makeMap(width, height, res) {
 			url += '%7C'+line[0]+','+line[1];
 		});
 		url += '&sensor=false';
-		res.send(url);
+		response.setHeader('Cache-Control', 'no-store');
+		response.send(url);
 	});
 }
 
@@ -414,6 +417,7 @@ app.get('/api/mapUrl/:width/:height', function(req, res) {
 });
 
 app.get('/api/ping', function(req, res) {
+	res.setHeader('Cache-Control', 'no-store');
 	res.send('OK');
 });
 
