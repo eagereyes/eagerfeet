@@ -204,6 +204,7 @@ function checkComplete(runs, response, userID, startTime) {
 function convertRunData(dirName, userID, runs, index, response, startTime) {
 	var run = runs[index];
 	if (run.gpxId.length > 0) {
+		mapURL = null;
 		serverRequest(RUNDATAPATH + run.id, function(body) {
 			runData = JSON.parse(body);
 			
@@ -349,29 +350,36 @@ function makeUserRunList(userID, response, startTime) {
 var MAPSBASEURL1 = 'http://maps.google.com/maps/api/staticmap?size=';
 var MAPSBASEURL2 = '&maptype=roadmap&&markers=icon:http%3A%2F%2Feagerfeet.org%2Fmapfoot.png%7Cshadow:false';
 
+var mapURL = null;
+
 function makeMap(width, height, response) {
-	fs.readFile(LOGFILENAME, 'utf8', function(err, data) {
-		if (err) throw err;
-		var splitLines = data.split('\n');
-		var lines = [];
-		splitLines.forEach(function(line) {
-			var values = line.split(',');
-			if (values.length == 5)
-				lines.push([values[3], values[4]]);
-		});
-		lines.sort();
-		lines = lines.filter(function(element, index, array) {
-			return (index == 0) || ((Math.abs(array[index][0]-array[index-1][0]) > .1)
-						&& (Math.abs(array[index][1]-array[index-1][1]) > .1));
-		});
-		var url = MAPSBASEURL1+width+'x'+height+MAPSBASEURL2;
-		lines.forEach(function(line) {
-			url += '%7C'+line[0]+','+line[1];
-		});
-		url += '&sensor=false';
+	if (mapURL != null) {
 		response.setHeader('Cache-Control', 'no-store');
-		response.send(url);
-	});
+		response.send(mapURL);
+	} else {
+		fs.readFile(LOGFILENAME, 'utf8', function(err, data) {
+			if (err) throw err;
+			var splitLines = data.split('\n');
+			var lines = [];
+			splitLines.forEach(function(line) {
+				var values = line.split(',');
+				if (values.length == 5)
+					lines.push([values[3], values[4]]);
+			});
+			lines.sort();
+			lines = lines.filter(function(element, index, array) {
+				return (index == 0) || ((Math.abs(array[index][0]-array[index-1][0]) > .1)
+							&& (Math.abs(array[index][1]-array[index-1][1]) > .1));
+			});
+			mapURL = MAPSBASEURL1+width+'x'+height+MAPSBASEURL2;
+			lines.forEach(function(line) {
+				mapURL += '%7C'+line[0]+','+line[1];
+			});
+			mapURL += '&sensor=false';
+			response.setHeader('Cache-Control', 'no-store');
+			response.send(mapURL);
+		});
+	}
 }
 
 function cleanup() {
