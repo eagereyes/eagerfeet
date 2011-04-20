@@ -4,4 +4,4 @@
 /eagerfeet-log.txt
 test/testdata.txt
 site/eagerfeet-header.*
-site/mapfoot.*
+site/mapfoot*

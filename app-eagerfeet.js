@@ -328,7 +328,7 @@ function makeUserRunList(userID, response, startTime) {
 				response.setHeader('Cache-Control', 'no-store');
 				response.send({
 					code: -1,
-					message: 'Error: User '+userID+' not found.'
+					message: '<b>Error</b>: User '+userID+' not found. Is your profile public (see <i>Troubleshooting</i> in the sidebar)?'
 				});
 //				console.log('User '+userID+' not found after '+((new Date())-startTime)+'ms');
 			} else {
