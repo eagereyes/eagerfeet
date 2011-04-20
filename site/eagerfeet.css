@@ -43,9 +43,9 @@ p.error {
 
 div#sidebar {
 	float: right;
-	width: 370px;
+	width: 360px;
 	background-color: #e0effd;
-	padding: 5px;
+	padding: .7em;
 	margin: 0 0 10px;
 }
 
@@ -79,7 +79,7 @@ div#list {
 div#eagereyes {
 	width: 360px;
 	height: 70px;
-	margin: 5px auto;
+	margin: 10px auto 5px;
 }
 
 #tweetbutton {
