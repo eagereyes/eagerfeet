@@ -174,10 +174,11 @@ function json2GPX(waypoints, run) {
 	waypoints.forEach(function(waypoint) {
 		
 		var trkPt = trkSeg.ele('trkpt');
-		trkPt.att('lat', waypoint.lat);
-		trkPt.att('lon', waypoint.lon);
+		trkPt.att('lat', ''+waypoint.lat);
+		trkPt.att('lon', ''+waypoint.lon);
 		
-		trkPt.ele('ele').txt(waypoint.alt);
+		// make sure to coerce number into string, or it does bad things when it sees 0
+		trkPt.ele('ele').txt(''+waypoint.alt);
 		
 		var time = new Date(waypoint.time);
 		trkPt.ele('time').txt(ISODateString(time));
