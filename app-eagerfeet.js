@@ -16,6 +16,7 @@
 
 var http = require('http');
 var fs = require('fs');
+var exec = require('child_process').exec;
 var crypto = require('crypto');
 var express = require('express');
 var builder = require('xmlbuilder');
@@ -187,18 +188,35 @@ function json2GPX(waypoints, run) {
 	return builder.toString();
 }
 
-function checkComplete(runs, response, userID, startTime) {
+function checkComplete(runs, response, userID, startTime, dirName) {
 	var allDone = true;
+	var numGPS = 0;
 	runs.forEach(function(r) {
-		allDone &= r.fileName != null;
+		if (r.fileName != null) {
+			if (r.fileName.length > 0)
+				numGPS += 1;
+		} else {
+			allDone = false;
+		}
 	});
 	if (allDone) {
 		response.setHeader('Cache-Control', 'no-store');
-		response.send({
-			code: 0,
-			runs: runs
-		});
-//		console.log('All done for '+userID+' after '+((new Date())-startTime)+'ms');
+		if (numGPS > 0) {
+			exec('zip AllRuns-'+dirName.slice(-5)+'.zip *.gpx', {cwd: 'site/'+dirName}, function(error, stdout, stderr) {
+				response.send({
+					code: 0,
+					runs: runs,
+					numGPS: numGPS,
+					zipfile: dirName+'/AllRuns-'+dirName.slice(-5)+'.zip'
+				});
+			});
+		} else {
+			response.send({
+				code: 0,
+				runs: runs,
+				numGPS: numGPS
+			});
+		}
 	}
 }
 
@@ -230,14 +248,14 @@ function convertRunData(dirName, userID, runs, index, response, startTime) {
 	
 					run.fileName = filename;
 	
-					checkComplete(runs, response, userID, startTime);
+					checkComplete(runs, response, userID, startTime, dirName);
 	
 				});
 			} else if (runData.plusService.status == 'failure') {
 				delete run.id;
 				delete run.gpxId;
 				run.fileName = '';
-				checkComplete(runs, response, userID, startTime);
+				checkComplete(runs, response, userID, startTime, dirName);
 			} else {
 				response.setHeader('Cache-Control', 'no-store');
 				response.send({
@@ -251,7 +269,7 @@ function convertRunData(dirName, userID, runs, index, response, startTime) {
 		delete run.id;
 		delete run.gpxId;
 		run.fileName = '';
-		checkComplete(runs, response, userID, startTime);
+		checkComplete(runs, response, userID, startTime, dirName);
 	}
 }
 

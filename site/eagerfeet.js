@@ -92,7 +92,10 @@ function lookup() {
 			$('#submit').show();
 			var gpsLinks = 0;
 			if (data.code == 0) {
-				var html = '<p>Found '+data.runs.length+' runs.</p>';
+				var html = '<p>Found '+data.runs.length+' runs, '+data.numGPS+' with GPS data. '
+				if (data.numGPS > 1)
+					html += '<a href="'+data.zipfile+'">Download All (ZIP file)</a>';
+				html += '</p>';
 				var date = new Date();
 				// ugly, but IE doesn't support forEach
 				for (var i = 0; i < data.runs.length; i++) {
