@@ -92,3 +92,7 @@ div#eagereyes {
 a img {
 	border: none;
 }
+
+#map img {
+	padding-bottom: 10px;
+}

@@ -223,7 +223,7 @@ function checkComplete(runs, response, userID, startTime, dirName) {
 function convertRunData(dirName, userID, runs, index, response, startTime) {
 	var run = runs[index];
 	if (run.gpxId.length > 0) {
-		mapURL = null;
+		mapURLs = null;
 		serverRequest(RUNDATAPATH + run.id, function(body) {
 			runData = JSON.parse(body);
 			
@@ -367,14 +367,14 @@ function makeUserRunList(userID, response, startTime) {
 }
 
 var MAPSBASEURL1 = 'http://maps.google.com/maps/api/staticmap?size=';
-var MAPSBASEURL2 = '&maptype=roadmap&&markers=icon:http%3A%2F%2Feagerfeet.org%2Fmapfoot.png%7Cshadow:false';
+var MAPSBASEURL2 = '&maptype=roadmap&&markers=icon:http%3A%2F%2Feagerfeet.org%2Fmapfoot-gold.png%7Cshadow:false';
 
-var mapURL = null;
+var mapURLs = null;
 
-function makeMap(width, height, response) {
-	if (mapURL != null) {
+function makeMaps(width, height, response) {
+	if (mapURLs != null) {
 		response.setHeader('Cache-Control', 'no-store');
-		response.send(mapURL);
+		response.send(mapURLs);
 	} else {
 		fs.readFile(LOGFILENAME, 'utf8', function(err, data) {
 			if (err) throw err;
@@ -387,16 +387,30 @@ function makeMap(width, height, response) {
 			});
 			lines.sort();
 			lines = lines.filter(function(element, index, array) {
-				return (index == 0) || ((Math.abs(array[index][0]-array[index-1][0]) > .1)
-							&& (Math.abs(array[index][1]-array[index-1][1]) > .1));
+				return (index == 0) || ((Math.abs(array[index][0]-array[index-1][0]) >= .1)
+							&& (Math.abs(array[index][1]-array[index-1][1]) >= .1));
 			});
-			mapURL = MAPSBASEURL1+width+'x'+height+MAPSBASEURL2;
-			lines.forEach(function(line) {
-				mapURL += '%7C'+line[0]+','+line[1];
+			mapURLs = [];
+			mapURLs[0] = MAPSBASEURL1+width+'x'+height+MAPSBASEURL2;
+			var linesWest = lines.filter(function(element) {
+				return element[1] < -25;
 			});
-			mapURL += '&sensor=false';
+			linesWest.forEach(function(line) {
+				mapURLs[0] += '%7C'+line[0]+','+line[1];
+			});
+			mapURLs[0] += '&sensor=false';
+			
+			mapURLs[1] = MAPSBASEURL1+width+'x'+height+MAPSBASEURL2;
+			var linesEast = lines.filter(function(element) {
+				return element[1] >= -25;
+			});
+			linesEast.forEach(function(line) {
+				mapURLs[1] += '%7C'+line[0]+','+line[1];
+			});
+			mapURLs[1] += '&sensor=false';
+			
 			response.setHeader('Cache-Control', 'no-store');
-			response.send(mapURL);
+			response.send(mapURLs);
 		});
 	}
 }
@@ -435,12 +449,11 @@ cleanup();
 var app = express.createServer();
 
 app.get('/api/runs/:userID', function(req, res) {
-//	console.log('NEW REQUEST for '+req.params.userID);
 	makeUserRunList(req.params.userID, res, new Date());
 });
 
-app.get('/api/mapUrl/:width/:height', function(req, res) {
-	makeMap(req.params.width, req.params.height, res);
+app.get('/api/mapURLs/:width/:height', function(req, res) {
+	makeMaps(req.params.width, req.params.height, res);
 });
 
 app.get('/api/ping', function(req, res) {
