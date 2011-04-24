@@ -116,7 +116,7 @@ function lookup() {
 						html += '<span class="gpxlink"><a href="'+run.fileName+'">GPX File</a></span></p>';
 						gpsLinks += 1;
 					}
-					html += '<p>'+parseFloat(run.distance).toFixed(2)+' mi';
+					html += '<p>'+parseFloat(run.distance/1.609344).toFixed(2)+' mi';
 					html += ', ' + formatDuration(run.duration);
 					if (run.calories > 0)
 						html += ', ' + Math.round(run.calories) + ' calories';
