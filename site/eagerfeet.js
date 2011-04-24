@@ -68,6 +68,13 @@ function formatTime(date) {
 	return date.getHours() + ":" + pad(date.getMinutes());
 }
 
+function formatDuration(duration) {
+	var hours = Math.floor(duration/3600000);
+	var minutes = Math.floor(duration/60000)-hours*60;
+	var seconds = Math.round((duration % 60000)/1000);
+	return pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
+}
+
 function clearGPXLinks() {
 	$('.gpxlink').html('<i>GPX link expired, please reload.</i>');
 }
@@ -110,14 +117,15 @@ function lookup() {
 						gpsLinks += 1;
 					}
 					html += '<p>'+parseFloat(run.distance).toFixed(2)+' mi';
+					html += ', ' + formatDuration(run.duration);
 					if (run.calories > 0)
-						html += ', '+Math.round(run.calories)+' calories';
+						html += ', ' + Math.round(run.calories) + ' calories';
 					if (run.terrain > 0)
-						html += ', '+terrain[run.terrain];
+						html += ', ' + terrain[run.terrain];
 					if (run.weather > 0)
-						html += ', '+weather[run.weather];
+						html += ', ' + weather[run.weather];
 					if (run.howFelt > 0)
-						html += ', '+felt[run.howFelt];
+						html += ', ' + felt[run.howFelt];
 					if (run.description.length > 0)
 						html += '</p><p>Comment: <i>'+run.description+'</i></p>';
 					html += '</div>\n';

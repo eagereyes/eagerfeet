@@ -290,6 +290,7 @@ function parseXML(xmlString, callback) {
 					id:				attrs[0][1],
 					startTime:		'',
 					distance:		'',
+					duration:		'',
 					calories:		'',
 					description:	'',
 					howFelt:		'',
@@ -306,6 +307,8 @@ function parseXML(xmlString, callback) {
 				currentRun.startTime += chars;
 			else if (enclosingElement == 'distance')
 				currentRun.distance += chars;
+			else if (enclosingElement == 'duration')
+				currentRun.duration += chars;
 			else if (enclosingElement == 'calories')
 				currentRun.calories += chars;
 			else if (enclosingElement == 'howFelt')
@@ -458,7 +461,7 @@ app.get('/api/mapURLs/:width/:height', function(req, res) {
 
 app.get('/api/ping', function(req, res) {
 	res.setHeader('Cache-Control', 'no-store');
-	res.send('OK');
+	res.send('OK\n');
 });
 
 app.listen(5555);
