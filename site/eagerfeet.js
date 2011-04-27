@@ -79,16 +79,39 @@ function clearGPXLinks() {
 	$('.gpxlink').html('<i>GPX link expired, please reload.</i>');
 }
 
+function setCookie(name,value,days) {
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime()+(days*24*60*60*1000));
+        var expires = "; expires="+date.toGMTString();
+    }
+    else var expires = "";
+    document.cookie = name+"="+value+expires+"; path=/";
+}
+
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+function deleteCookie(name) {
+    setCookie(name,"",-1);
+}
+
+
 function lookup() {
 	// to avoid errors when the clicky tracking code is removed
-	// doesn't seem to entirely work though, no more clicks are reported.
-	// for some reason, clicky is undefined here even when it's defined further down.
-	// Some kind of race condition?
-//	if (typeof(clicky) === 'undefined') {
-//		var clicky = {
-//			log: function() { }
-//		}
-//	}
+	if (typeof(clicky) === 'undefined') {
+		clicky = { // note that a 'var' here would get hoisted, which would always be undefined
+			log: function() { }
+		}
+	}
 	$('#progress').show();
 	$('#submit').hide();
 	var match = $('#userID')[0].value.match(/(\d+)/);
