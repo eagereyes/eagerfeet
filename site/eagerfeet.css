@@ -93,6 +93,10 @@ a img {
 	border: none;
 }
 
+p.units {
+	text-align: right;
+}
+
 #map img {
 	padding-bottom: 10px;
 }

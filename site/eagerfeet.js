@@ -16,6 +16,10 @@
 
 var timeout;
 
+var unit = 'mi';
+
+var runs;
+
 // from http://dansnetwork.com/javascript-iso8601rfc3339-date-parser/
 Date.prototype.setISO8601 = function(dString){
 
@@ -75,11 +79,18 @@ function formatDuration(duration) {
 	return pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
 }
 
+function formatDistance(distance) {
+	if (unit == 'mi')
+		return parseFloat(distance/1.609344).toFixed(2) + ' mi';
+	else
+		return parseFloat(distance).toFixed(2) + ' km';
+}
+
 function clearGPXLinks() {
 	$('.gpxlink').html('<i>GPX link expired, please reload.</i>');
 }
 
-function setCookie(name,value,days) {
+function setCookie(name, value, days) {
     if (days) {
         var date = new Date();
         date.setTime(date.getTime()+(days*24*60*60*1000));
@@ -92,10 +103,12 @@ function setCookie(name,value,days) {
 function getCookie(name) {
     var nameEQ = name + "=";
     var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
+    for(var i = 0; i < ca.length; i++) {
         var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) {
+        	return c.substring(nameEQ.length, c.length);
+        }
     }
     return null;
 }
@@ -104,6 +117,14 @@ function deleteCookie(name) {
     setCookie(name,"",-1);
 }
 
+function setUnit(newUnit) {
+	unit = newUnit;
+	setCookie('unit', unit, 10000);
+	var distanceSpans = $('.distance');
+	for (var i = 0; i < runs.length; i++) {
+		distanceSpans[i].innerHTML = formatDistance(runs[i].distance);
+	}
+}
 
 function lookup() {
 	// to avoid errors when the clicky tracking code is removed
@@ -111,6 +132,10 @@ function lookup() {
 		clicky = { // note that a 'var' here would get hoisted, which would always be undefined
 			log: function() { }
 		}
+	}
+	var cookieUnit = getCookie('unit');
+	if (cookieUnit) {
+		unit = cookieUnit;
 	}
 	$('#progress').show();
 	$('#submit').hide();
@@ -126,6 +151,16 @@ function lookup() {
 				if (data.numGPS > 1)
 					html += '<span class="gpxlink"><a href="'+data.zipfile+'">Download All (ZIP file)</a></span>';
 				html += '</p>';
+				html += '<p class="units">Distance Unit: <input type="radio" name="unit" value="Miles" ';
+				if (unit == 'mi') {
+					html += 'checked ';
+				}
+				html += 'onclick="setUnit(\'mi\')">Miles</input> <input type="radio" name="unit" value="Kilometers"'
+				if (unit == 'km') {
+					html += 'checked ';
+				}
+				html += 'onclick="setUnit(\'km\')">Kilometers</input></p>';
+				runs = data.runs;
 				var date = new Date();
 				// ugly, but IE doesn't support forEach
 				for (var i = 0; i < data.runs.length; i++) {
@@ -139,7 +174,7 @@ function lookup() {
 						html += '<span class="gpxlink"><a href="'+run.fileName+'">GPX File</a></span></p>';
 						gpsLinks += 1;
 					}
-					html += '<p>'+parseFloat(run.distance/1.609344).toFixed(2)+' mi';
+					html += '<p><span class="distance">'+formatDistance(run.distance)+'</span>';
 					html += ', ' + formatDuration(run.duration);
 					if (run.calories > 0)
 						html += ', ' + Math.round(run.calories) + ' calories';
