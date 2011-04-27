@@ -300,27 +300,32 @@ function parseXML(xmlString, callback) {
 					fileName:		null
 				};
 				runs.push(currentRun);
+			} else if (elem == 'runListSummary') {
+				currentRun = null;
 			}
 		});
 		cb.onCharacters(function(chars) {
-			if (enclosingElement == 'startTime')
-				currentRun.startTime += chars;
-			else if (enclosingElement == 'distance')
-				currentRun.distance += chars;
-			else if (enclosingElement == 'duration')
-				currentRun.duration += chars;
-			else if (enclosingElement == 'calories')
-				currentRun.calories += chars;
-			else if (enclosingElement == 'howFelt')
-				currentRun.howFelt += chars;
-			else if (enclosingElement == 'weather')
-				currentRun.weather += chars;
-			else if (enclosingElement == 'terrain')
-				currentRun.terrain += chars;
-			else if (enclosingElement == 'gpxId')
-				currentRun.gpxId += chars;
-			else if (enclosingElement == 'status')
+			if (currentRun != null) {
+				if (enclosingElement == 'startTime') {
+					currentRun.startTime += chars;
+				} else if (enclosingElement == 'distance') {
+					currentRun.distance += chars;
+				} else if (enclosingElement == 'duration') {
+					currentRun.duration += chars;
+				} else if (enclosingElement == 'calories') {
+					currentRun.calories += chars;
+				} else if (enclosingElement == 'howFelt') {
+					currentRun.howFelt += chars;
+				} else if (enclosingElement == 'weather') {
+					currentRun.weather += chars;
+				} else if (enclosingElement == 'terrain') {
+					currentRun.terrain += chars;
+				} else if (enclosingElement == 'gpxId') {
+					currentRun.gpxId += chars;
+				}
+			} else if (enclosingElement == 'status') {
 				status += chars;
+			}
 		});
 		cb.onEndDocument(function() {
 			callback(status, runs);
