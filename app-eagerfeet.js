@@ -352,8 +352,10 @@ function makeUserRunList(userID, response, startTime) {
 					code: -1,
 					message: '<b>Error</b>: User '+userID+' not found. Is your profile public (see <i>Troubleshooting</i> in the sidebar)?'
 				});
-//				console.log('User '+userID+' not found after '+((new Date())-startTime)+'ms');
+
 			} else {
+
+				runs.reverse();
 	    	
 				var dirName = 'data/' + md5Sum(userID + (new Date()).toUTCString());
 			
