@@ -8,7 +8,11 @@
 		$(document).ready(function() {
 			$('#email').attr('href', 'mailto:'+window.location.hostname.slice(0,-4)+'@me.com');
 			$.get('http://eagerfeet.org/api/mapURLs/560/560', function(data) {
-				$('#map').html('<p>Where EagerFeet users are running:</p><img src="'+data[0]+'" width="560" height="560"><p></p><img src="'+data[1]+'" width="560" height="560">');
+				var html = '<p>Where EagerFeet users are running:</p>';
+				for (var i = 0; i < data.length; i++) {
+					html += '<img src="'+data[i]+'" width="560" height="560"><p></p>';
+				}
+				$('#map').html(html);
 			});
 		});
 	</script>

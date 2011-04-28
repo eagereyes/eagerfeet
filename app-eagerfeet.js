@@ -381,6 +381,15 @@ var MAPSBASEURL2 = '&maptype=roadmap&&markers=icon:http%3A%2F%2Feagerfeet.org%2F
 
 var mapURLs = null;
 
+function mapURL(pointList, width, height, zoom) {
+	var url = MAPSBASEURL1+width+'x'+height+MAPSBASEURL2;
+	pointList.forEach(function(line) {
+		url += '%7C'+line[0]+','+line[1];
+	});
+	url += '&zoom='+zoom+'&sensor=false';
+	return url;
+}
+
 function makeMaps(width, height, response) {
 	if (mapURLs != null) {
 		response.setHeader('Cache-Control', 'no-store');
@@ -401,24 +410,21 @@ function makeMaps(width, height, response) {
 							&& (Math.abs(array[index][1]-array[index-1][1]) >= .1));
 			});
 			mapURLs = [];
-			mapURLs[0] = MAPSBASEURL1+width+'x'+height+MAPSBASEURL2;
 			var linesWest = lines.filter(function(element) {
 				return element[1] < -25;
 			});
-			linesWest.forEach(function(line) {
-				mapURLs[0] += '%7C'+line[0]+','+line[1];
-			});
-			mapURLs[0] += '&sensor=false';
+			mapURLs.push(mapURL(linesWest, width, height, 3));
 			
-			mapURLs[1] = MAPSBASEURL1+width+'x'+height+MAPSBASEURL2;
 			var linesEast = lines.filter(function(element) {
-				return element[1] >= -25;
+				return element[1] >= -25 && element[0] > 32;
 			});
-			linesEast.forEach(function(line) {
-				mapURLs[1] += '%7C'+line[0]+','+line[1];
-			});
-			mapURLs[1] += '&sensor=false';
+			mapURLs.push(mapURL(linesEast, width, height, 4));
 			
+			var linesAfrica = lines.filter(function(element) {
+				return element[1] >= -25 && element[0] <= 32;
+			});
+			mapURLs.push(mapURL(linesAfrica, width, height, 3));
+
 			response.setHeader('Cache-Control', 'no-store');
 			response.send(mapURLs);
 		});
