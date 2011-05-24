@@ -33,6 +33,8 @@ var DELETEFREQUENCY = 3 * 60 * 1000; // cleanup runs every three minutes
 
 var LOGFILENAME = 'eagerfeet-log.txt'
 
+var MAXRETRIES = 3;
+
 var LOGFILEOPTIONS = {
 	flags: 'a',
 	encoding: 'utf8',
@@ -94,12 +96,13 @@ function fileNameDateString(d) {
 }
 
       
-function serverRequest(path, resultFunc) {
+function serverRequest(path, userID, resultFunc) {
 
 	var options = {
 		host: RUNLISTSERVER,
 		port: 80,
-		path: path
+		path: path,
+		headers: { Cookie: 'plusid='+userID+'&nikerunning.nike.com'}
 	};
 
 	http.get(options, function(response) {
@@ -224,10 +227,12 @@ function convertRunData(dirName, userID, runs, index, response, startTime) {
 	var run = runs[index];
 	if (run.gpxId.length > 0) {
 		mapURLs = null;
-		serverRequest(RUNDATAPATH + run.id, function(body) {
+		serverRequest(RUNDATAPATH + run.id, userID, function(body) {
 			runData = JSON.parse(body);
 			
 			if (runData.plusService.status == 'success') {
+				
+//				console.log(run.id+': '+run.retryCount+' retries');
 				
 				var gpx = json2GPX(runData.plusService.route.waypointList, run);
 				
@@ -249,13 +254,19 @@ function convertRunData(dirName, userID, runs, index, response, startTime) {
 					run.fileName = filename;
 	
 					checkComplete(runs, response, userID, startTime, dirName);
-	
 				});
 			} else if (runData.plusService.status == 'failure') {
-				delete run.id;
-				delete run.gpxId;
-				run.fileName = '';
-				checkComplete(runs, response, userID, startTime, dirName);
+				if (run.retryCount < MAXRETRIES) {
+					run.retryCount += 1;
+					process.nextTick(function() {
+						convertRunData(dirName, userID, runs, index, response, startTime);
+					});
+				} else {
+					delete run.id;
+					delete run.gpxId;
+					run.fileName = '';
+					checkComplete(runs, response, userID, startTime, dirName);
+				}
 			} else {
 				response.setHeader('Cache-Control', 'no-store');
 				response.send({
@@ -297,7 +308,8 @@ function parseXML(xmlString, callback) {
 					weather:		'',
 					terrain:		'',
 					gpxId:			'',
-					fileName:		null
+					fileName:		null,
+					retryCount:		0
 				};
 				runs.push(currentRun);
 			} else if (elem == 'runListSummary') {
@@ -347,7 +359,7 @@ function parseXML(xmlString, callback) {
 }
 
 function makeUserRunList(userID, response, startTime) {
-	serverRequest(RUNLISTPATH + userID, function (body) {
+	serverRequest(RUNLISTPATH + userID, userID, function (body) {
 	
 		parseXML(body, function(status, runs) {
 			
@@ -421,9 +433,15 @@ function makeMaps(width, height, response) {
 			mapURLs.push(mapURL(linesEast, width, height, 4));
 			
 			var linesAfrica = lines.filter(function(element) {
-				return element[1] >= -25 && element[0] <= 32;
+				return element[1] >= -25 && element[1] < 60 && element[0] <= 32;
 			});
 			mapURLs.push(mapURL(linesAfrica, width, height, 3));
+
+			var linesAsiaPacific = lines.filter(function(element) {
+				return element[1] >= 60;
+			});
+			mapURLs.push(mapURL(linesAsiaPacific, width, height, 3));
+
 
 			response.setHeader('Cache-Control', 'no-store');
 			response.send(mapURLs);
@@ -455,7 +473,7 @@ process.on('exit', function () {
 });
 
 process.on('uncaughtException', function (err) {
-	console.log((new Date())+' :: Caught exception: ' + err);
+	console.log((new Date())+' :: Caught exception: ' + err + '\n' + err.stack + '\n');
 });
 
 logFile = fs.createWriteStream(LOGFILENAME, LOGFILEOPTIONS);
