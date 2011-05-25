@@ -7,6 +7,10 @@
 	<script type="text/javascript">
 		$(document).ready(function() {
 			$('#email').attr('href', 'mailto:'+window.location.hostname.slice(0,-4)+'@me.com');
+			var userID = getCookie('userID');
+			if (userID) {
+				$('#userID')[0].value = userID;
+			}
 			$.get('http://eagerfeet.org/api/mapURLs/560/560', function(data) {
 				var html = '<p>Where EagerFeet users are running:</p>';
 				for (var i = 0; i < data.length; i++) {
