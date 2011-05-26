@@ -9,6 +9,22 @@ The server is written using [node.js](http://nodejs.org). It requires the follow
 * [express](https://github.com/visionmedia/express)
 * [node-xml](https://github.com/robrighter/node-xml)
 * [xmlbuilder-js](https://github.com/oozcitak/xmlbuilder-js)
+* [node-sqlite3](https://github.com/developmentseed/node-sqlite3)
+
+## Database
+
+The site now logs its data in a sqlite database called `runs.db`. The statement to create the runs table in that database is:
+
+````sql
+CREATE TABLE "runs" (
+	"runID" TEXT PRIMARY KEY ON CONFLICT REPLACE,
+	"userID" TEXT,
+	"date" TEXT,
+	"latitude" REAL,
+	"longitude" REAL,
+	"distance" REAL DEFAULT 0
+)
+````
 
 ## License
 

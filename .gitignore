@@ -6,4 +6,5 @@ test/testdata.txt
 site/eagerfeet-header.*
 site/mapfoot*
 /test
+runs.db
 

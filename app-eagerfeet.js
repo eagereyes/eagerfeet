@@ -21,6 +21,7 @@ var crypto = require('crypto');
 var express = require('express');
 var builder = require('xmlbuilder');
 var xml = require("node-xml");
+var sqlite3 = require('sqlite3');
 
 var RUNLISTSERVER = 'nikerunning.nike.com';
 
@@ -31,17 +32,11 @@ var RUNDATAPATH = '/nikeplus/v2/services/app/get_gps_detail.jsp?_plus=true&forma
 var DELETETIMEOUT =  20 * 60 * 1000; // files are deleted after 20 minutes
 var DELETEFREQUENCY = 3 * 60 * 1000; // cleanup runs every three minutes
 
-var LOGFILENAME = 'eagerfeet-log.txt'
-
 var MAXRETRIES = 3;
 
-var LOGFILEOPTIONS = {
-	flags: 'a',
-	encoding: 'utf8',
-	mode: 0666
-}
+var RUNSDBFILENAME = 'runs.db';
 
-var logFile;
+var runsDB;
 
 // from https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Date
 function pad(n) {
@@ -245,9 +240,10 @@ function convertRunData(dirName, userID, runs, index, response, startTime) {
 					stream.end(gpx, 'utf8');
 				});
 				stream.on('close', function() {
-					logFile.write(md5Sum(userID + runs[0].startTime)+','+md5Sum(userID+':'+run.id) + ',' +
-						ISODateString(new Date()) + ',' +
-						run.lat.toFixed(1) + ',' + run.lon.toFixed(1) + '\n');
+					runsDB.run('INSERT INTO runs VALUES (?, ?, ?, ?, ?, ?)',
+						md5Sum(userID+':'+run.id), md5Sum(userID + runs[0].startTime),
+						ISODateString(new Date()),
+						run.lat.toFixed(1), run.lon.toFixed(1), parseFloat(run.distance).toFixed(1));
 	
 					delete run.id;
 	
@@ -396,7 +392,7 @@ var mapURLs = null;
 function mapURL(pointList, width, height, zoom) {
 	var url = MAPSBASEURL1+width+'x'+height+MAPSBASEURL2;
 	pointList.forEach(function(line) {
-		url += '%7C'+line[0]+','+line[1];
+		url += '%7C'+line.latitude+','+line.longitude;
 	});
 	url += '&zoom='+zoom+'&sensor=false';
 	return url;
@@ -407,40 +403,35 @@ function makeMaps(width, height, response) {
 		response.setHeader('Cache-Control', 'no-store');
 		response.send(mapURLs);
 	} else {
-		fs.readFile(LOGFILENAME, 'utf8', function(err, data) {
+		runsDB.all('SELECT latitude, longitude FROM runs', function(err, rows) {
 			if (err) throw err;
-			var splitLines = data.split('\n');
-			var lines = [];
-			splitLines.forEach(function(line) {
-				var values = line.split(',');
-				if (values.length == 5)
-					lines.push([values[3], values[4]]);
+			rows.sort(function(a, b) {
+				return (a.latitude * 1000 + a.longitude) - (b.latitude * 1000 + b.longitude);
 			});
-			lines.sort();
-			lines = lines.filter(function(element, index, array) {
-				return (index == 0) || ((Math.abs(array[index][0]-array[index-1][0]) >= .1)
-							&& (Math.abs(array[index][1]-array[index-1][1]) >= .1));
+			rows = rows.filter(function(element, index, array) {
+				return (index == 0) || ((Math.abs(array[index].latitude-array[index-1].latitude) >= .1)
+							&& (Math.abs(array[index].longitude-array[index-1].longitude) >= .1));
 			});
 			mapURLs = [];
-			var linesWest = lines.filter(function(element) {
-				return element[1] < -25;
+			var rowsWest = rows.filter(function(element) {
+				return element.longitude < -25;
 			});
-			mapURLs.push(mapURL(linesWest, width, height, 3));
+			mapURLs.push(mapURL(rowsWest, width, height, 3));
 			
-			var linesEast = lines.filter(function(element) {
-				return element[1] >= -25 && element[0] > 32;
+			var rowsEast = rows.filter(function(element) {
+				return element.longitude >= -25 && element.latitude > 32;
 			});
-			mapURLs.push(mapURL(linesEast, width, height, 4));
+			mapURLs.push(mapURL(rowsEast, width, height, 4));
 			
-			var linesAfrica = lines.filter(function(element) {
-				return element[1] >= -25 && element[1] < 60 && element[0] <= 32;
+			var rowsAfrica = rows.filter(function(element) {
+				return element.longitude >= -25 && element.longitude < 60 && element.latitude <= 32;
 			});
-			mapURLs.push(mapURL(linesAfrica, width, height, 3));
+			mapURLs.push(mapURL(rowsAfrica, width, height, 3));
 
-			var linesAsiaPacific = lines.filter(function(element) {
-				return element[1] >= 60;
+			var rowsAsiaPacific = rows.filter(function(element) {
+				return element.longitude >= 60;
 			});
-			mapURLs.push(mapURL(linesAsiaPacific, width, height, 3));
+			mapURLs.push(mapURL(rowsAsiaPacific, width, height, 3));
 
 
 			response.setHeader('Cache-Control', 'no-store');
@@ -469,14 +460,14 @@ function cleanup() {
 
 
 process.on('exit', function () {
-	logFile.end();
+
 });
 
 process.on('uncaughtException', function (err) {
 	console.log((new Date())+' :: Caught exception: ' + err + '\n' + err.stack + '\n');
 });
 
-logFile = fs.createWriteStream(LOGFILENAME, LOGFILEOPTIONS);
+runsDB = new sqlite3.Database(RUNSDBFILENAME);
 
 cleanup();
 
