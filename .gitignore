@@ -7,4 +7,5 @@ site/eagerfeet-header.*
 site/mapfoot*
 /test
 runs.db
+runkeeper.json
 

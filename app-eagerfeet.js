@@ -220,7 +220,7 @@ function checkComplete(runs, response, userID, startTime, dirName) {
 
 function convertRunData(dirName, userID, runs, index, response, startTime) {
 	var run = runs[index];
-	if (run.gpxId.length > 0) {
+	if (run.gpxId.length > 0 && run.convert) {
 		mapURLs = null;
 		serverRequest(RUNDATAPATH + run.id, userID, function(body) {
 			runData = JSON.parse(body);
@@ -242,11 +242,9 @@ function convertRunData(dirName, userID, runs, index, response, startTime) {
 				stream.on('close', function() {
 					runsDB.run('INSERT INTO runs VALUES (?, ?, ?, ?, ?, ?)',
 						md5Sum(userID+':'+run.id), md5Sum(userID + runs[0].startTime),
-						ISODateString(new Date()),
-						run.lat.toFixed(1), run.lon.toFixed(1), parseFloat(run.distance).toFixed(1));
-	
-					delete run.id;
-	
+						ISODateString(startTime), run.lat.toFixed(1), run.lon.toFixed(1),
+						parseFloat(run.distance).toFixed(1));
+		
 					run.fileName = filename;
 	
 					checkComplete(runs, response, userID, startTime, dirName);
@@ -258,8 +256,6 @@ function convertRunData(dirName, userID, runs, index, response, startTime) {
 						convertRunData(dirName, userID, runs, index, response, startTime);
 					});
 				} else {
-					delete run.id;
-					delete run.gpxId;
 					run.fileName = '';
 					checkComplete(runs, response, userID, startTime, dirName);
 				}
@@ -273,8 +269,6 @@ function convertRunData(dirName, userID, runs, index, response, startTime) {
 			}
 		});
 	} else {
-		delete run.id;
-		delete run.gpxId;
 		run.fileName = '';
 		checkComplete(runs, response, userID, startTime, dirName);
 	}
@@ -354,7 +348,7 @@ function parseXML(xmlString, callback) {
 	parser.parseString(xmlString);
 }
 
-function makeUserRunList(userID, response, startTime) {
+function makeUserRunList(userID, response, startTime, lastRunID) {
 	serverRequest(RUNLISTPATH + userID, userID, function (body) {
 	
 		parseXML(body, function(status, runs) {
@@ -370,8 +364,15 @@ function makeUserRunList(userID, response, startTime) {
 
 				runs.reverse();
 	    	
-				var dirName = 'data/' + md5Sum(userID + (new Date()).toUTCString());
-			
+	    		var convert = true;
+	    		
+	    		for (var i = 0; i < runs.length; i++) {
+	    			convert = convert && (runs[i].id != lastRunID);
+	    			runs[i].convert = convert;
+	    		}
+	    	
+				var dirName = 'data/' + md5Sum(userID + startTime.toUTCString());
+				
 				fs.mkdir('site/'+dirName, 0755, function() {
 					for (var i = 0; i < runs.length; i++) {
 						(function(index) {
@@ -419,7 +420,7 @@ function makeMaps(width, height, response) {
 			mapURLs.push(mapURL(rowsWest, width, height, 3));
 			
 			var rowsEast = rows.filter(function(element) {
-				return element.longitude >= -25 && element.latitude > 32;
+				return element.longitude >= -25 && element.longitude < 40 && element.latitude > 32;
 			});
 			mapURLs.push(mapURL(rowsEast, width, height, 4));
 			
@@ -473,8 +474,9 @@ cleanup();
 
 var app = express.createServer();
 
-app.get('/api/runs/:userID', function(req, res) {
-	makeUserRunList(req.params.userID, res, new Date());
+app.get('/api/runs/:userID/:lastRun?', function(req, res) {
+	var lastRunID = req.params.lastRun || -1;
+	makeUserRunList(req.params.userID, res, new Date(), lastRunID);
 });
 
 app.get('/api/mapURLs/:width/:height', function(req, res) {

@@ -143,7 +143,9 @@ function lookup() {
 	if (match != null) {
 		var userID = match[0];
 		$('#userID')[0].value = userID;
-		$.get('http://eagerfeet.org/api/runs/'+userID, function(data) {
+//		var lastRunID = getCookie('lastRunID') || -1;
+		var lastRunID = -1;
+		$.get('http://eagerfeet.org/api/runs/'+userID+'/'+lastRunID, function(data) {
 			$('#progress').hide();
 			$('#submit').show();
 			var gpsLinks = 0;
@@ -197,6 +199,7 @@ function lookup() {
 				clicky.log('/#success/'+data.runs.length+'/'+gpsLinks,
 					'Success: '+data.runs.length+' runs, '+gpsLinks+' with GPS data');
 				setCookie('userID', userID, 90);
+//				setCookie('lastRunID', runs[2].id, 90);
 			} else {
 				$('#runs').html('<p class="error">'+data.message+'</p>');
 				clicky.log('#notfound', 'userID not found');

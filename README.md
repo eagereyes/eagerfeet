@@ -13,7 +13,7 @@ The server is written using [node.js](http://nodejs.org). It requires the follow
 
 ## Database
 
-The site now logs its data in a sqlite database called `runs.db`. The statement to create the runs table in that database is:
+The site now logs its data in a sqlite database called `runs.db` (user and run IDs are hashed for privacy). The statement to create the runs table in that database is:
 
 ````sql
 CREATE TABLE "runs" (
