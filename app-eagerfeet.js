@@ -385,61 +385,6 @@ function makeUserRunList(userID, response, startTime, lastRunID) {
 	});
 }
 
-var MAPSBASEURL1 = 'http://maps.google.com/maps/api/staticmap?size=';
-var MAPSBASEURL2 = '&maptype=roadmap&&markers=icon:http%3A%2F%2Feagerfeet.org%2Fmapfoot-gold.png%7Cshadow:false';
-
-var mapURLs = null;
-
-function mapURL(pointList, width, height, zoom) {
-	var url = MAPSBASEURL1+width+'x'+height+MAPSBASEURL2;
-	pointList.forEach(function(line) {
-		url += '%7C'+line.latitude+','+line.longitude;
-	});
-	url += '&zoom='+zoom+'&sensor=false';
-	return url;
-}
-
-function makeMaps(width, height, response) {
-	if (mapURLs != null) {
-		response.setHeader('Cache-Control', 'no-store');
-		response.send(mapURLs);
-	} else {
-		runsDB.all('SELECT latitude, longitude FROM runs', function(err, rows) {
-			if (err) throw err;
-			rows.sort(function(a, b) {
-				return (a.latitude * 1000 + a.longitude) - (b.latitude * 1000 + b.longitude);
-			});
-			rows = rows.filter(function(element, index, array) {
-				return (index == 0) || ((Math.abs(array[index].latitude-array[index-1].latitude) >= .1)
-							&& (Math.abs(array[index].longitude-array[index-1].longitude) >= .1));
-			});
-			mapURLs = [];
-			var rowsWest = rows.filter(function(element) {
-				return element.longitude < -25;
-			});
-			mapURLs.push(mapURL(rowsWest, width, height, 3));
-			
-			var rowsEast = rows.filter(function(element) {
-				return element.longitude >= -25 && element.longitude < 40 && element.latitude > 32;
-			});
-			mapURLs.push(mapURL(rowsEast, width, height, 4));
-			
-			var rowsAfrica = rows.filter(function(element) {
-				return element.longitude >= -25 && element.longitude < 60 && element.latitude <= 32;
-			});
-			mapURLs.push(mapURL(rowsAfrica, width, height, 3));
-
-			var rowsAsiaPacific = rows.filter(function(element) {
-				return element.longitude >= 60;
-			});
-			mapURLs.push(mapURL(rowsAsiaPacific, width, height, 3));
-
-
-			response.setHeader('Cache-Control', 'no-store');
-			response.send(mapURLs);
-		});
-	}
-}
 
 function cleanup() {
 	var now = new Date();
@@ -477,10 +422,6 @@ var app = express.createServer();
 app.get('/api/runs/:userID/:lastRun?', function(req, res) {
 	var lastRunID = req.params.lastRun || -1;
 	makeUserRunList(req.params.userID, res, new Date(), lastRunID);
-});
-
-app.get('/api/mapURLs/:width/:height', function(req, res) {
-	makeMaps(req.params.width, req.params.height, res);
 });
 
 app.get('/api/ping', function(req, res) {

@@ -1,7 +1,8 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>EagerFeet :: Export GPS Data from Nike+</title>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js" type="text/javascript"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript"></script>
 	<script src="eagerfeet.js" type="text/javascript"></script>
 	<link rel="stylesheet" type="text/css" href="eagerfeet.css"/>
 	<script type="text/javascript">
@@ -11,14 +12,6 @@
 			if (userID) {
 				$('#userID')[0].value = userID;
 			}
-			$.get('http://eagerfeet.org/api/mapURLs/560/560', function(data) {
-				var html = '<p>Where EagerFeet users are running:</p>';
-				for (var i = 0; i < data.length; i++) {
-					html += '<img src="'+data[i]+'" width="560" height="560"><p></p>';
-				}
-				$('#map').html(html);
-			});
-		});
 	</script>
 </head>
 <body>
