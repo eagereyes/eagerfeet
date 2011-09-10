@@ -223,9 +223,15 @@ function convertRunData(dirName, userID, runs, index, response, startTime) {
 	if (run.gpxId.length > 0 && run.convert) {
 		mapURLs = null;
 		serverRequest(RUNDATAPATH + run.id, userID, function(body) {
-			runData = JSON.parse(body);
+			try {
+				runData = JSON.parse(body);
+			} catch (error) {
+				console.log((new Date())+' :: Caught exception: ' + err + '\n');
+				console.log('Offending document: '+body+'\n');
+				runData = {plusService: {status: 'fail'}};
+			}
 			
-			if (runData.plusService.status == 'success') {
+			if (runData.plusService.status === 'success') {
 				
 //				console.log(run.id+': '+run.retryCount+' retries');
 				
