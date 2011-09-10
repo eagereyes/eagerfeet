@@ -124,7 +124,9 @@ function md5Sum(string) {
 }
 
 function json2GPX(waypoints, run) {
-	var gpxNode = builder.begin('gpx');
+	var gpxDoc = builder.create();
+	
+	var gpxNode = gpxDoc.begin('gpx');
 	gpxNode.att('version', '1.1');
 	gpxNode.att('creator', 'http://eagerfeet.org/');
 	gpxNode.att('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
@@ -183,7 +185,7 @@ function json2GPX(waypoints, run) {
 		trkPt.ele('time').txt(ISODateString(time));
 	});
 
-	return builder.toString();
+	return gpxDoc.toString();
 }
 
 function checkComplete(runs, response, userID, startTime, dirName) {
