@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>EagerFeet :: Export GPS Data from Nike+</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript"></script>
+	<script src="eagerfeet.js" type="text/javascript"></script>
+	<link rel="stylesheet" type="text/css" href="eagerfeet.css" />
+	<link rel="stylesheet" type="text/css" href="bootstrap-1.2.0.css" />
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#email').attr('href', 'mailto:'+window.location.hostname.slice(0,-4)+'@me.com');
+			var userID = getCookie('userID');
+		});
+			
+		function rkLogin() {
+			$.get('http://eagerfeet.org/api2/rk/authData', function (data) {
+				window.location.href = data.auth_url+'?client_id='+data.client_id+
+					'&response_type=code&redirect_uri='+encodeURI(data.redirect_uri);
+			});
+		}
+	</script>
+</head>
+<body>
+<div id="main">
+	<div id="header"><img src="eagerfeet-header.png" width="960" height="150"></div>
+	<div id="list">
+			<input type="submit" name="rk-login" value="Log In with RunKeeper" class="btn primary" onclick="rkLogin();" />
+
+		<div id="runs"></div><div id="map"></div>
+	</div>
+	<div id="sidebar">
+	<div id="tweetbutton"><a href="http://twitter.com/share" class="twitter-share-button" data-count="vertical" data-via="eagereyes">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script></div>
+	<p>Check out the new <a href="http://blog.eagerfeet.org/">EagerFeet blog</a>!</p>
+	<h2>Instructions</h2>
+	<p>This website lets you export GPS data from Nike+ using your <b>numeric</b> user ID. Here is how you find it:</p>
+	<ol>
+		<li>Log into your account on the <a href="http://nikerunning.nike.com/" target="_blank">Nike+ website</a>.</li>
+		<li>Click on one of your runs.</li>
+		<li>Copy the URL from your browser's URL bar and paste it into the input box on the left.</li>
+		<li>Click <i>Submit</i>.</li>
+	</ol>
+	<p>Make sure that the URL contains a number with eight to ten digits!</p>
+	<p>Once all your runs are loaded, you can download the GPS data by clicking on the <i>GPX Data</i> links where available. Your data is only stored for 20 minutes, so download it right away. You can always click submit again to have the server retrieve a fresh copy of the data.</p>
+	
+	<h2>Why?</h2>
+	<p>Nike+ and the Nike iPhone app are a nice starting point, but they become limiting very quickly. Nike's website is also slow and tedious to use. Better services exist, but without the ability to take your run data with you they are not as appealing. EagerFeet was created to change that by giving you control over your own data.</p>
+	
+	<h2>How?</h2>
+	<p>Use this website to export your run data as <a href="http://en.wikipedia.org/wiki/GPS_eXchange_Format" target="_blank">GPX files</a> (an XML file format for exchanging GPS data). You can then import them into your favorite software or website (like <a href="http://runkeeper.com/" target="_blank">RunKeeper</a>).</p>
+	
+	<h2>Troubleshooting</h2>
+	<p>Nike's servers sometimes throw an error, which the program interprets as the user not being found. If you copied the correct URL and are told that the user does not exist, please just try again.</p>
+	
+	<p>Your profile must also be set to <i>public</i>. After you log in, click on your picture in the lower left. A small menu appears, select <i>View My Profile</i>. Then click on the <i>Settings</i> tab and click on <i>Privacy</i>. Make sure the option <i>Share your profile and more of your activity</i> is selected. If it is not, change it, click <i>Save</i>, and then try again.</p>
+	
+	<h2>Privacy</h2>
+	<p>This service accesses your private run data, including the location data of your runs. We store your data for a short time (20 minutes) so you can download it. Your user ID is only kept in memory, and never stored on disk in plain text.</p>
+	<p>To create the map, the program logs the center point of each of your runs to a precision of one tenth of a degree latitude and longitude. This means that you could only be located to within about six miles (ten kilometers). The center is calculated by drawing a box around the entire route of your run, so in most cases it will not even be on the route itself.</p>
+	
+	<h2>Source Code</h2>
+	<p>The source code of this website and the service behind it <a href="https://github.com/eagereyes/eagerfeet">is available on github</a>.</p>
+	
+	<h2>Contact</h2>
+	<p>If you have trouble with the site, please <a id="email">let me know</a>. It would be very helpful if you could include your Nike+ user ID (or the entire URL you pasted in) so I can see what's going on. This is especially true if you have lots of runs (more than 50 or so) or very long runs (longer than 10 miles).</p>
+	<p>This site was created by <a href="http://kosara.net/" target="_blank">Robert Kosara</a> and is not affiliated with Nike+ or any of its competitors.</p>
+	<div id="eagereyes"><a href="http://eagereyes.org/" target="_blank"><img src="http://eagereyes.org/themes/feather/images/logo.png" width="360" height="70"></a></div>
+	</div>
+</div>
+
+<!-- Tracking code, please remove if you use this somewhere else! -->
+<script src="//static.getclicky.com/js" type="text/javascript"></script>
+<script type="text/javascript">try{ clicky.init(66409777); }catch(e){}</script>
+<noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/66409777ns.gif" /></p></noscript>
+<!-- End of tracking code -->
+</body>
+</html>
