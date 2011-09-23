@@ -228,7 +228,7 @@ function convertRunData(dirName, userID, runs, index, response, startTime) {
 			try {
 				runData = JSON.parse(body);
 			} catch (error) {
-				console.log((new Date())+' :: Caught exception: ' + err + '\n');
+				console.log((new Date())+' :: Caught exception: ' + error + '\n');
 				console.log('Offending document: '+body+'\n');
 				runData = {plusService: {status: 'fail'}};
 			}
@@ -345,10 +345,10 @@ function parseXML(xmlString, callback) {
 				currentRun.description += cdata;
 		});
 		cb.onWarning(function(msg) {
-//			console.log('PARSER WARNING: '+msg);
+			console.log('PARSER WARNING: '+msg);
 		});
 		cb.onError(function(msg) {
-//			cosole.log('PARSER ERROR: '+JSON.stringify(msg));
+			console.log('PARSER ERROR: '+JSON.stringify(msg));
 			callback('failure', runs);
 		});
 	});

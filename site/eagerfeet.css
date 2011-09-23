@@ -96,3 +96,7 @@ a img {
 p.units {
 	text-align: right;
 }
+
+.download {
+	float: right;
+}

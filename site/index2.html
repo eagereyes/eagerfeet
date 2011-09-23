@@ -3,8 +3,9 @@
 <head>
 <title>EagerFeet :: Export GPS Data from Nike+</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript"></script>
-	<script src="eagerfeet.js" type="text/javascript"></script>
+	<script src="eagerfeet2.js" type="text/javascript"></script>
 	<link rel="stylesheet" type="text/css" href="eagerfeet.css"/>
+	<link rel="stylesheet" href="bootstrap-1.2.0.css" type="text/css" />
 	<script type="text/javascript">
 		$(document).ready(function() {
 			$('#email').attr('href', 'mailto:'+window.location.hostname.slice(0,-4)+'@me.com');
@@ -23,13 +24,13 @@
 		<form onsubmit="lookup(); return false;">
 			<p>Enter your <b>numeric</b> Nike+ ID (or a URL containing it):</p>
 			<input type="text" name="userID" id="userID" value="" />
-			<input type="submit" id="submit" />
-			<span id="progress"><img src="progress-spinner.gif" width="16" height="16"> Loading data, please wait. This can (and likely will) take several minutes.</span>
+			<input type="submit" id="submit" class="btn success" />
+			<span id="progress"><img src="progress-spinner.gif" width="16" height="16"> Loading data, please wait. This can take several minutes.</span>
 		</form>
-		<div id="runs"><p>We're back! For now, you will have to be patient because Nike's servers are incredibly slow. Things will speed up soon though, once the new version of the site is ready. Please see <a href="http://blog.eagerfeet.org/">the blog</a> for more.</p></div><div id="map"></div>
+		<div id="runs"></div>
 	</div>
 	<div id="sidebar">
-	<div id="tweetbutton"><a href="http://twitter.com/share" class="twitter-share-button" data-count="vertical" data-via="eagereyes">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script></div>
+	<div id="tweetbutton"><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://eagerfeet.org/" data-count="vertical" data-via="eagereyes">Tweet</a><script type="text/javascript" src="//platform.twitter.com/widgets.js"></script></div>
 	<p>Check out the <a href="http://blog.eagerfeet.org/">EagerFeet blog</a>!</p>
 	<h2>Instructions</h2>
 	<p>This website lets you export GPS data from Nike+ using your <b>numeric</b> user ID. Here is how you find it:</p>

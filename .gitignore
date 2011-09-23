@@ -8,3 +8,5 @@ site/mapfoot*
 /test
 runs.db
 rk-config.js
+
+db-conf.js
