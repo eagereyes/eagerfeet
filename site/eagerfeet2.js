@@ -173,7 +173,12 @@ function lookup() {
 					if (!run.gpsData)
 						html += '<div class="download">no GPS data</i></div>';
 					else {
-						html += '<div class="download"><a href="/api2/getGPX/'+run.runID+'" class="btn disabled" id="'+run.runID+'">Download GPX File</a></div>';
+						html += '<div class="download"><a href="/api2/getGPX/'+run.runID+'" class="btn ';
+						if (run.inDB)
+							html += 'primary';
+						else
+							html += 'disabled';
+						html += '" id="'+run.runID+'">Download GPX File</a></div>';
 						gpsLinks += 1;
 					}
 					html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date)+'</p>';
@@ -195,7 +200,7 @@ function lookup() {
 				clicky.log('/#success/'+data.runs.length+'/'+gpsLinks,
 					'Success: '+data.runs.length+' runs, '+gpsLinks+' with GPS data');
 				setCookie('userID', userID, 90);
-				$.get('http://eagerfeet.org/api2/poll/'+userID, pollRuns);
+				$.get('http://eagerfeet.org/api2/poll/'+data.userID, pollRuns);
 			} else {
 				$('#runs').html('<p class="error">'+data.message+'</p>');
 				clicky.log('#notfound', 'userID not found');

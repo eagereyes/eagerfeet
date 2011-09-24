@@ -17,7 +17,12 @@ function ISODateString(d) {
     + 'Z';
 }
 
-exports.json2GPX = function(waypoints, run) {
+function fileNameDateString(d) {
+    return d.getUTCFullYear() + '' + pad(d.getUTCMonth() + 1) + '' + pad(d.getUTCDate()) + '-'
+    + pad(d.getUTCHours()) + '' + pad(d.getUTCMinutes()) + '' + pad(d.getUTCSeconds());
+}
+
+exports.exportGPX = function(dbClient, runID, response) {
 	var gpxDoc = builder.create();
 	
 	var gpxNode = gpxDoc.begin('gpx');
@@ -27,58 +32,48 @@ exports.json2GPX = function(waypoints, run) {
 	gpxNode.att('xmlns', 'http://www.topografix.com/GPX/1/1');
 	gpxNode.att('xsi:schemaLocation', 'http://www.topografix.com/GPX/1/1 http://www.topografix.com/gpx/1/1/gpx.xsd');
 	
-	var metadata = gpxNode.ele('metadata');
-	metadata.ele('name').txt('Run '+run.id+', '+run.startTime);
+	dbClient.query('select * from Runs where runID = ?', [runID], function(err, results, fields) {
 	
-	var bounds = {
-		minlat:  100000,
-		maxlat: -100000,
-		minlon:  100000,
-		maxlon: -100000
-	};
+		var run = results[0];
 		
-	waypoints.forEach(function(waypoint) {
-		if (waypoint.lon < bounds.minlon)
-			bounds.minlon = waypoint.lon;
-		if (waypoint.lon > bounds.maxlon)
-			bounds.maxlon = waypoint.lon;
+		var runName = 'Run '+run.runID+', '+run.startTime;
 		
-		if (waypoint.lat < bounds.minlat)
-			bounds.minlat = waypoint.lat;
-		if (waypoint.lat > bounds.maxlat)
-			bounds.maxlat = waypoint.lat;
+		var metadata = gpxNode.ele('metadata');
+		metadata.ele('name').txt(runName);
+			
+		var b = metadata.ele('bounds');
+		b.att('minlat', run.minlat);
+		b.att('maxlat', run.maxlat);
+		b.att('minlon', run.minlon);
+		b.att('maxlon', run.maxlon);
+	
+		var trk = gpxNode.ele('trk');
+		
+		trk.ele('name').txt(runName);
+		trk.ele('time').txt(run.startTime);
+		trk.ele('type').txt('Run');
+		
+		var trkSeg = trk.ele('trkseg');
+		
+		dbClient.query('select lat, lon, ele, time from Waypoints where runID = ?', [runID], function(err, results, fields) {
+			
+			results.forEach(function(wp) {
+				var trkPt = trkSeg.ele('trkpt');
+				trkPt.att('lat', ''+wp.lat);
+				trkPt.att('lon', ''+wp.lon);
+				
+				// make sure to coerce number into string, or it does bad things when it sees 0
+				trkPt.ele('ele').txt(''+wp.ele);
+				
+				trkPt.ele('time').txt(ISODateString(wp.time));
+			});
+			
+//			console.log(gpxDoc.toString());
+			response.setHeader('Content-Disposition', 'attachment; filename=Run-'+fileNameDateString(run.startTime)+'.gpx');
+			response.setHeader('Content-Type', 'application/gpx+xml');
+			response.send(gpxDoc.toString());
+			
+		});
 	});
-	
-	var b = metadata.ele('bounds');
-	b.att('minlat', bounds.minlat);
-	b.att('maxlat', bounds.maxlat);
-	b.att('minlon', bounds.minlon);
-	b.att('maxlon', bounds.maxlon);
-
-	run.lat = (bounds.minlat+bounds.maxlat)/2;
-	run.lon = (bounds.minlon+bounds.maxlon)/2;
-	
-	var trk = gpxNode.ele('trk');
-	
-	trk.ele('name').txt('Run '+run.id+', '+run.startTime);
-	trk.ele('time').txt(run.startTime);
-	trk.ele('type').txt('Run');
-	
-	var trkSeg = trk.ele('trkseg');
-	
-	waypoints.forEach(function(waypoint) {
-		
-		var trkPt = trkSeg.ele('trkpt');
-		trkPt.att('lat', ''+waypoint.lat);
-		trkPt.att('lon', ''+waypoint.lon);
-		
-		// make sure to coerce number into string, or it does bad things when it sees 0
-		trkPt.ele('ele').txt(''+waypoint.alt);
-		
-		var time = new Date(waypoint.time);
-		trkPt.ele('time').txt(ISODateString(time));
-	});
-
-	return gpxDoc.toString();
 }
 

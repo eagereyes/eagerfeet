@@ -1,7 +1,6 @@
 
 var xml = require("node-xml");
 var http = require('http');
-var mysql = require('mysql');
 
 var RUNLISTSERVER = 'nikerunning.nike.com';
 
@@ -13,11 +12,15 @@ var MAXRETRIES = 5;
 
 var METERS_PER_MILE = 1609.344;
 
+var felt = [null, "Awesome", "So-So", "Sluggish", "Injured"];
+
+var terrain = [null, "Road", "Trail", "Treadmill", "Track"];
+
+var weather = [null, "Sunny", "Cloudy", "Rainy", "Snowy"];
+
+var dbClient;
+
 var users = {};
-
-var dbconf = require('./db-conf.js').dbconf;
-
-var dbClient = mysql.createClient(dbconf);
 
 // from http://dansnetwork.com/javascript-iso8601rfc3339-date-parser/
 Date.prototype.setISO8601 = function(dString){
@@ -70,28 +73,56 @@ function serverRequest(path, userID, resultFunc) {
 	});
 }
 
-function storeRunInDB(userID, runID, runData) {
+function storeRunInDB(userID, runID, run, runData) {
+	
+	var minlat =  100000;
+	var maxlat = -100000;
+	var minlon =  100000;
+	var maxlon = -100000;
+
 	runData.plusService.route.waypointList.forEach(function(wp) {
-		dbClient.query('insert into Waypoints set runID = ?, time = ?, lat = ?, lon = ?, ele = ?',
-						[runID, new Date(wp.time), wp.lat, wp.lon, wp.alt]);
+		dbClient.query('replace Waypoints set runID = ?, time = ?, lat = ?, lon = ?, ele = ?',
+							[runID, new Date(wp.time), wp.lat, wp.lon, wp.alt]);
+		
+		if (wp.lon < minlon)
+			minlon = wp.lon;
+		if (wp.lon > maxlon)
+			maxlon = wp.lon;
+		
+		if (wp.lat < minlat)
+			minlat = wp.lat;
+		if (wp.lat > maxlat)
+			maxlat = wp.lat;
 	});
+
+	var summary = runData.plusService.sportsData.runSummary;
+
+	if (run.description.length == 0)
+		run.description = null;
+
+	dbClient.query('insert into Runs set userID = ?, runID = ?, startTime = ?, distance = ?, '+
+					'duration = ?, calories = ?, howFelt = ?, weather = ?, terrain = ?, note = ?, '+
+					'minlat = ?, maxlat = ?, minlon = ?, maxlon = ?',
+					[userID, runID, new Date(summary.startTime), summary.distance*METERS_PER_MILE,
+					 summary.duration, summary.calories, felt[run.howFelt], weather[run.weather], terrain[run.terrain], run.description,
+					 minlat, maxlat, minlon, maxlon]);
 }
 
 function convertRunData(user, run) {
-	serverRequest(RUNDATAPATH + run.nikeID, user.userID, function(body) {
+	serverRequest(RUNDATAPATH + run.nikeID, user.nikeID, function(body) {
 		try {
 			runData = JSON.parse(body);
 		} catch (error) {
 			console.log((new Date())+' :: Caught exception: ' + error + '\n');
 			console.log('Offending document: '+body+'\n');
-			runData = {plusService: {status: 'fail'}};
+			runData = {plusService: {status: 'failure'}};
 		}
 		
 		if (runData.plusService.status === 'success') {
 			
-//				console.log(run.id+': '+run.retryCount+' retries');
+			console.log(run.runID+': '+run.retryCount+' retries');
 		
-			storeRunInDB(user.userID, run.runID, runData);
+			storeRunInDB(user.userID, run.runID, run, runData);
 			
 			if (user.responses.length > 0) {
 				sendRun(user.responses.pop(), run, user.userID);
@@ -99,20 +130,15 @@ function convertRunData(user, run) {
 				user.runsDone.unshift(run);
 			}
 			
-		} else if (runData.plusService.status == 'failure') {
+		} else {
 			if (run.retryCount < MAXRETRIES) {
 				run.retryCount += 1;
 				process.nextTick(function() {
 					convertRunData(user, run);
 				});
+			} else {
+				console.log('giving up on '+run.runID+'...');
 			}
-//		} else {
-//			response.setHeader('Cache-Control', 'no-store');
-//			response.send({
-//				code: -1,
-//				message: "Error retrieving data, please try again."
-//			});
-//				console.log('Error getting data for '+userID);
 		}
 	});
 }
@@ -193,8 +219,8 @@ function parseXML(xmlString, callback) {
 	parser.parseString(xmlString);
 }
 
-exports.makeUserRunList = function(userID, response, startTime) {
-	serverRequest(RUNLISTPATH + userID, userID, function (body) {
+exports.makeUserRunList = function(userID, nikeID, response, startTime) {
+	serverRequest(RUNLISTPATH + nikeID, nikeID, function(body) {
 	
 		parseXML(body, function(status, runs) {
 			
@@ -217,28 +243,40 @@ exports.makeUserRunList = function(userID, response, startTime) {
 								
 				var user = {
 					userID:		userID,
+					nikeID:		nikeID,
 					runs:		runs,
 					runsDone:	[],
 					responses:	[]
 				};
 				
-				users[userID] = user;
-				
-				for (var i = 0; i < runs.length; i++) {
-					if (runs[i].gpsData)
-						convertRunData(user, runs[i]);
-				}
-				
-				response.setHeader('Cache-Control', 'no-store');
-				response.send({
-					code:	0,
-					userID:	userID,
-					runs:	runs,
-					numGPS:	numGPS
-				});
+				users[nikeID] = user;
 
-				console.log('Initial request for user '+userID+' done after '+((new Date())-startTime)/1000+'s');
+				dbClient.query('select runID from Runs where userID = ?', [userID],
+					function(err, results, fields) {
 
+						results.forEach(function(dbRun) {
+							runs.forEach(function(run) {
+								if (run.runID == dbRun.runID)
+									run.inDB = true;
+							});
+						});
+
+						for (var i = 0; i < runs.length; i++) {
+							if (runs[i].gpsData && !runs[i].inDB)
+								convertRunData(user, runs[i]);
+						}
+						
+						response.setHeader('Cache-Control', 'no-store');
+						response.send({
+							code:	0,
+							userID:	userID,
+							runs:	runs,
+							numGPS:	numGPS
+						});
+		
+						console.log('Initial request for user '+userID+' done after '+((new Date())-startTime)/1000+'s');
+						
+					});
 			}
 		});
 	});
@@ -253,8 +291,8 @@ function sendRun(response, run, userID) {
 	});
 }
 
-exports.poll = function(userID, response) {
-	var user = users[userID];
+exports.poll = function(nikeID, response) {
+	var user = users[nikeID];
 	if (user) {
 		if (user.runsDone.length > 0) {
 			sendRun(response, user.runsDone.pop(), user.userID);
@@ -268,4 +306,8 @@ exports.poll = function(userID, response) {
 			code: -1
 		});
 	}
+}
+
+exports.init = function(db) {
+	dbClient = db;
 }
