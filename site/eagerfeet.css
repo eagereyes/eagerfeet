@@ -1,85 +1,64 @@
-/* @override http://eagerfeet.org/eagerfeet.css */
-
-body {
-	font-family: sans-serif;
+html, body {
+	background-color: #eee;
 }
 
-li {
-	margin-bottom: 3px;
+body {
+	padding-top: 40px;
+}
+
+.container {
+	width: 820px;
+}
+
+/* The white background content wrapper */
+.content {
+	background-color: #fff;
+	padding: 20px;
+	margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
+	-webkit-border-radius: 0 0 6px 6px;
+	   -moz-border-radius: 0 0 6px 6px;
+	        border-radius: 0 0 6px 6px;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+	   -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+	        box-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
+
+/* Page header tweaks */
+.page-header {
+	background-color: #f5f5f5;
+	padding: 20px 20px 10px;
+	margin: -20px -20px 20px;
+}
+
+/* Give a quick and non-cross-browser friendly divider */
+.content .span4 {
+	margin-left: 0;
+	padding-left: 19px;
+	border-left: 1px solid #eee;
+}
+
+.topbar .btn {
+	border: 0;
+}
+  
+#progress {
+	display: none;
 }
 
 div.run {
-	background-color: #eaeaea;
-	padding: 3px;
+	background-color: #eee;
+	padding: 5px;
 	margin-bottom: 1em;
+	margin-right: 1em;
+}
+
+div.run > p {
+	margin-bottom: 0;
 }
 
 span.title {
 	font-weight: bold;
 	font-size: 1.5em;
-}
-
-#progress {
-	display: none;
-}
-
-p {
-	margin: 0 2px 5px;
-}
-
-div#header {
-	height: 150px;
-	margin-bottom: 10px;
-	margin-top: 10px;
-}
-
-p.error {
-	background-color: #ffe5e6;
-	color: #ff1e17;
-	padding: 10px;
-	border-color: #ff1e17;
-	border-style: solid;
-}
-
-div#sidebar {
-	float: right;
-	width: 360px;
-	background-color: #e0effd;
-	padding: .7em;
-	margin: 0 0 10px;
-}
-
-h2 {
-	margin: 0 2px;
-}
-
-div#main {
-	width: 960px;
-	margin-right: auto;
-	margin-left: auto;
-	padding: 0;
-}
-
-form {
-	height: 60px;
-	margin-bottom: 15px;
-	margin-top: 5px;
-}
-
-#userID {
-	width: 560px;
-}
-
-div#list {
-	float: left;
-	width: 560px;
-	margin: 0;
-}
-
-div#eagereyes {
-	width: 360px;
-	height: 70px;
-	margin: 10px auto 5px;
 }
 
 #tweetbutton {
@@ -89,14 +68,18 @@ div#eagereyes {
 	margin: 5px;
 }
 
-a img {
-	border: none;
-}
-
 p.units {
 	text-align: right;
 }
 
 .download {
 	float: right;
+}
+
+.alert-message {
+	margin-right: 1em;
+}
+
+#alert {
+	display: none;
 }

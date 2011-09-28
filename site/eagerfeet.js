@@ -14,11 +14,11 @@
 	OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-var timeout;
+var APIPREFIX = 'http://eagerfeet.org/api/';
 
 var unit = 'mi';
 
-var runs;
+var runs = [];
 
 // from http://dansnetwork.com/javascript-iso8601rfc3339-date-parser/
 Date.prototype.setISO8601 = function(dString){
@@ -76,7 +76,10 @@ function formatDuration(duration) {
 	var hours = Math.floor(duration/3600000);
 	var minutes = Math.floor(duration/60000)-hours*60;
 	var seconds = Math.round((duration % 60000)/1000);
-	return pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
+	if (hours > 0)
+		return pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
+	else
+		return pad(minutes) + ':' + pad(seconds);
 }
 
 function formatDistance(distance) {
@@ -84,10 +87,6 @@ function formatDistance(distance) {
 		return parseFloat(distance/1.609344).toFixed(2) + ' mi';
 	else
 		return parseFloat(distance).toFixed(2) + ' km';
-}
-
-function clearGPXLinks() {
-	$('.gpxlink').html('<i>GPX link expired, please reload.</i>');
 }
 
 function setCookie(name, value, days) {
@@ -126,6 +125,14 @@ function setUnit(newUnit) {
 	}
 }
 
+function pollRuns(data) {
+	if (data.code == 0) {
+		$('#'+data.runID).removeClass('disabled').addClass('success').attr('href', APIPREFIX+'getGPX/'+data.runID);
+		$.get(APIPREFIX+'poll/'+data.userID, pollRuns);
+	}
+}
+
+
 function lookup() {
 	// to avoid errors when the clicky tracking code is removed
 	if (typeof(clicky) === 'undefined') {
@@ -137,32 +144,19 @@ function lookup() {
 	if (cookieUnit) {
 		unit = cookieUnit;
 	}
+	$('#alert').hide();
 	$('#progress').show();
-	$('#submit').hide();
+	$('#submit').addClass('disabled');
 	var match = $('#userID')[0].value.match(/(\d+)/);
 	if (match != null) {
 		var userID = match[0];
 		$('#userID')[0].value = userID;
-//		var lastRunID = getCookie('lastRunID') || -1;
-		var lastRunID = -1;
-		$.get('http://eagerfeet.org/api/runs/'+userID+'/'+lastRunID, function(data) {
+		$.get(APIPREFIX+'runs/'+userID, function(data) {
 			$('#progress').hide();
-			$('#submit').show();
+			$('#submit').removeClass('disabled');
 			var gpsLinks = 0;
 			if (data.code == 0) {
-				var html = '<p>Found '+data.runs.length+' runs, '+data.numGPS+' with GPS data. '
-				if (data.numGPS > 1)
-					html += '<span class="gpxlink"><a href="'+data.zipfile+'">Download All (ZIP file)</a></span>';
-				html += '</p>';
-				html += '<p class="units">Distance Unit: <input type="radio" name="unit" value="Miles" ';
-				if (unit == 'mi') {
-					html += 'checked ';
-				}
-				html += 'onclick="setUnit(\'mi\')">Miles</input> <input type="radio" name="unit" value="Kilometers"'
-				if (unit == 'km') {
-					html += 'checked ';
-				}
-				html += 'onclick="setUnit(\'km\')">Kilometers</input></p>';
+				var html = '<p>Found '+data.runs.length+' runs, '+data.numGPS+' with GPS data.</p>';
 				runs = data.runs;
 				var date = new Date();
 				// ugly, but IE doesn't support forEach
@@ -170,13 +164,18 @@ function lookup() {
 					var run = data.runs[i];
 					date.setISO8601(run.startTime);
 					html += '<div class="run">';
-					html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date)+' &mdash; ';
-					if (run.fileName.length == 0)
-						html += '<i>no GPS data</i></p>';
+					if (!run.gpsData)
+						html += '<div class="download">no GPS data</i></div>';
 					else {
-						html += '<span class="gpxlink"><a href="'+run.fileName+'">GPX File</a></span></p>';
+						html += '<div class="download"><a class="btn ';
+						if (run.inDB)
+							html += 'success" href="'+APIPREFIX+'getGPX/'+run.runID+'"';
+						else
+							html += 'disabled" ';
+						html += 'id="'+run.runID+'">Download GPX File</a></div>';
 						gpsLinks += 1;
 					}
+					html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date)+'</p>';
 					html += '<p><span class="distance">'+formatDistance(run.distance)+'</span>';
 					html += ', ' + formatDuration(run.duration);
 					if (run.calories > 0)
@@ -192,28 +191,27 @@ function lookup() {
 					html += '</div>\n';
 				}
 				$('#runs').html(html);
-				$('#map').hide();
-				if (timeout)
-					clearTimeout(timeout);
-				timeout = setTimeout(clearGPXLinks, 20 * 60 * 1000);
 				clicky.log('/#success/'+data.runs.length+'/'+gpsLinks,
 					'Success: '+data.runs.length+' runs, '+gpsLinks+' with GPS data');
 				setCookie('userID', userID, 90);
-//				setCookie('lastRunID', runs[2].id, 90);
+				$.get(APIPREFIX+'poll/'+data.userID, pollRuns);
 			} else {
-				$('#runs').html('<p class="error">'+data.message+'</p>');
+				$('#errormsg').html('<p>'+data.message+'</p>');
+				$('#alert').show();
 				clicky.log('#notfound', 'userID not found');
 			}
 		}).error(function() {
-			$('#runs').html('<p class="error">Error: Server is down, please try again in a few minutes.</p>');
+			$('#errormsg').html('<p><b>Error:</b> Server is down, please try again in a few minutes.</p>');
+			$('#alert').show();
 			$('#progress').hide();
-			$('#submit').show();
+			$('#submit').removeClass('disabled');
 			clicky.log('/#serverdown', 'Server down');
 		});
 	} else {
-		$('#runs')[0].innerHTML = '<p class="error">Error: Please enter your <b>numeric</b> user ID. See the sidebar on the right for instructions.</p>';
+		$('#errormsg').html('<p><b>Error:</b> Please enter your <b>numeric</b> user ID. See the sidebar on the right for instructions.</p>');
+		$('#alert').show();
 		$('#progress').hide();
-		$('#submit').show();
+		$('#submit').removeClass('disabled');
 		clicky.log('/#nomatch', 'No numeric userID in text field');
 	}
 	return false;

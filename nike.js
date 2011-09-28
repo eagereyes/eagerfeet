@@ -120,7 +120,7 @@ function convertRunData(user, run) {
 		
 		if (runData.plusService.status === 'success') {
 			
-			console.log(run.runID+': '+run.retryCount+' retries');
+			//console.log(run.runID+': '+run.retryCount+' retries');
 		
 			storeRunInDB(user.userID, run.runID, run, runData);
 			
@@ -137,7 +137,7 @@ function convertRunData(user, run) {
 					convertRunData(user, run);
 				});
 			} else {
-				console.log('giving up on '+run.runID+'...');
+				//console.log('giving up on '+run.runID+'...');
 			}
 		}
 	});
@@ -228,7 +228,7 @@ exports.makeUserRunList = function(userID, nikeID, response, startTime) {
 				response.setHeader('Cache-Control', 'no-store');
 				response.send({
 					code: -1,
-					message: '<b>Error</b>: User '+userID+' not found. Is your profile public (see <i>Troubleshooting</i> in the sidebar)?'
+					message: '<b>Error</b>: User '+nikeID+' not found. Is your profile public (see <i>Troubleshooting</i> in the sidebar)?'
 				});
 				
 			} else {
@@ -274,7 +274,7 @@ exports.makeUserRunList = function(userID, nikeID, response, startTime) {
 							numGPS:	numGPS
 						});
 		
-						console.log('Initial request for user '+userID+' done after '+((new Date())-startTime)/1000+'s');
+						//console.log('Initial request for user '+userID+' done after '+((new Date())-startTime)/1000+'s');
 						
 					});
 			}
@@ -300,7 +300,7 @@ exports.poll = function(nikeID, response) {
 			user.responses.unshift(response)
 		}
 	} else {
-		console.log('User '+userID+' not found!');
+		//console.log('User '+userID+' not found!');
 		response.setHeader('Cache-Control', 'no-store');
 		response.send({
 			code: -1
