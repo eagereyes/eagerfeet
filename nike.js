@@ -18,8 +18,6 @@ var terrain = [null, "Road", "Trail", "Treadmill", "Track"];
 
 var weather = [null, "Sunny", "Cloudy", "Rainy", "Snowy"];
 
-var dbClient;
-
 var users = {};
 
 // from http://dansnetwork.com/javascript-iso8601rfc3339-date-parser/
@@ -73,7 +71,7 @@ function serverRequest(path, userID, resultFunc) {
 	});
 }
 
-function storeRunInDB(userID, runID, run, runData) {
+function storeRunInDB(userID, runID, run, runData, dbClient) {
 	
 	var minlat =  100000;
 	var maxlat = -100000;
@@ -108,7 +106,7 @@ function storeRunInDB(userID, runID, run, runData) {
 					 minlat, maxlat, minlon, maxlon]);
 }
 
-function convertRunData(user, run) {
+function convertRunData(user, run, dbClient) {
 	serverRequest(RUNDATAPATH + run.nikeID, user.nikeID, function(body) {
 		try {
 			runData = JSON.parse(body);
@@ -122,7 +120,7 @@ function convertRunData(user, run) {
 			
 			//console.log(run.runID+': '+run.retryCount+' retries');
 		
-			storeRunInDB(user.userID, run.runID, run, runData);
+			storeRunInDB(user.userID, run.runID, run, runData, dbClient);
 			
 			if (user.responses.length > 0) {
 				sendRun(user.responses.pop(), run, user.userID);
@@ -134,7 +132,7 @@ function convertRunData(user, run) {
 			if (run.retryCount < MAXRETRIES) {
 				run.retryCount += 1;
 				process.nextTick(function() {
-					convertRunData(user, run);
+					convertRunData(user, run, dbClient);
 				});
 			} else {
 				//console.log('giving up on '+run.runID+'...');
@@ -219,7 +217,7 @@ function parseXML(xmlString, callback) {
 	parser.parseString(xmlString);
 }
 
-exports.makeUserRunList = function(userID, nikeID, response, startTime) {
+exports.makeUserRunList = function(userID, nikeID, response, dbClient) {
 	serverRequest(RUNLISTPATH + nikeID, nikeID, function(body) {
 	
 		parseXML(body, function(status, runs) {
@@ -263,7 +261,7 @@ exports.makeUserRunList = function(userID, nikeID, response, startTime) {
 
 						for (var i = 0; i < runs.length; i++) {
 							if (runs[i].gpsData && !runs[i].inDB)
-								convertRunData(user, runs[i]);
+								convertRunData(user, runs[i], dbClient);
 						}
 						
 						response.setHeader('Cache-Control', 'no-store');
@@ -273,9 +271,6 @@ exports.makeUserRunList = function(userID, nikeID, response, startTime) {
 							runs:	runs,
 							numGPS:	numGPS
 						});
-		
-						//console.log('Initial request for user '+userID+' done after '+((new Date())-startTime)/1000+'s');
-						
 					});
 			}
 		});
@@ -306,8 +301,4 @@ exports.poll = function(nikeID, response) {
 			code: -1
 		});
 	}
-}
-
-exports.init = function(db) {
-	dbClient = db;
 }

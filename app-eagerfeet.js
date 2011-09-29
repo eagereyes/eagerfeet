@@ -25,13 +25,11 @@ var dbconf = require('./db-conf.js').dbconf;
 
 var APIPREFIX = '/api/';
 
-var dbClient = mysql.createClient(dbconf);
-
 var users = {};
 
 var maxUserID = 1000;
 
-function loadUsers() {
+function loadUsers(dbClient) {
 	dbClient.query('select * from Users', function(err, results, fields) {
 		results.forEach(function(user) {
 			users[user.userID] = user;
@@ -49,7 +47,7 @@ function findUserByNikeID(nikeID) {
 	return null;
 }
 
-function newUserWithNikeID(nikeID) {
+function newUserWithNikeID(nikeID, dbClient) {
 	maxUserID += 1;
 	var newUser = {
 		userID:				maxUserID,
@@ -66,7 +64,6 @@ function newUserWithNikeID(nikeID) {
 }
 
 process.on('exit', function () {
-	dbClient.end();
 });
 
 process.on('uncaughtException', function (err) {
@@ -76,11 +73,13 @@ process.on('uncaughtException', function (err) {
 var app = express.createServer();
 
 app.get(APIPREFIX+'runs/:userID', function(req, res) {
-	var user = findUserByNikeID(req.params.userID);
+	var dbClient = mysql.createClient(dbconf);
+	
+	var user = findUserByNikeID(req.params.userID, dbClient);
 	if (user == null) {
-		user = newUserWithNikeID(req.params.userID);
+		user = newUserWithNikeID(req.params.userID, dbClient);
 	}
-	nike.makeUserRunList(user.userID, req.params.userID, res, new Date());
+	nike.makeUserRunList(user.userID, req.params.userID, res, dbClient);
 });
 
 app.get(APIPREFIX+'poll/:userID', function(req, res) {
@@ -88,7 +87,7 @@ app.get(APIPREFIX+'poll/:userID', function(req, res) {
 });
 
 app.get(APIPREFIX+'getGPX/:runID', function(req, res) {
-	export.exportGPX(dbClient, req.params.runID, res);
+	export.exportGPX(mysql.createClient(dbconf), req.params.runID, res);
 });
 
 app.get(APIPREFIX+'ping', function(req, res) {
@@ -109,6 +108,5 @@ app.get(APIPREFIX+'rk/login', function(req, res) {
 });
 
 
-loadUsers();
-nike.init(dbClient);
+loadUsers(mysql.createClient(dbconf));
 app.listen(5555);
