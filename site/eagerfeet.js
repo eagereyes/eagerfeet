@@ -175,7 +175,8 @@ function lookup() {
 						html += 'id="'+run.runID+'">Download GPX File</a></div>';
 						gpsLinks += 1;
 					}
-					html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date)+'</p>';
+					html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date);
+					html += '</p>';
 					html += '<p><span class="distance">'+formatDistance(run.distance)+'</span>';
 					html += ', ' + formatDuration(run.duration);
 					if (run.calories > 0)
@@ -186,6 +187,8 @@ function lookup() {
 						html += ', ' + weather[run.weather];
 					if (run.howFelt > 0)
 						html += ', ' + felt[run.howFelt];
+					if (run.hasHRData)
+						html += ', &hearts;';
 					if (run.description.length > 0)
 						html += '</p><p>Comment: <i>'+run.description+'</i></p>';
 					html += '</div>\n';

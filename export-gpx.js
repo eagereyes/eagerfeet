@@ -59,11 +59,10 @@ exports.exportGPX = function(dbClient, runID, response) {
 			
 			results.forEach(function(wp) {
 				var trkPt = trkSeg.ele('trkpt');
-				trkPt.att('lat', ''+wp.lat);
-				trkPt.att('lon', ''+wp.lon);
+				trkPt.att('lat', wp.lat);
+				trkPt.att('lon', wp.lon);
 				
-				// make sure to coerce number into string, or it does bad things when it sees 0
-				trkPt.ele('ele').txt(''+wp.ele);
+				trkPt.ele('ele').txt(wp.ele);
 				
 				trkPt.ele('time').txt(ISODateString(wp.time));
 			});

@@ -93,16 +93,25 @@ function storeRunInDB(userID, runID, run, runData, dbClient) {
 			maxlat = wp.lat;
 	});
 
+	if (run.hasHRData) {
+		var values = run.hrData.data.split(', ');
+		for (var i = 0; i < values.length; i++) {
+			dbClient.query('replace Heartrates set runID = ?, offset = ?, heartrate = ?',
+								[runID, i*run.hrData.intervalValue, values[i]]);
+		}
+		delete run.hrData;
+	}
+
 	var summary = runData.plusService.sportsData.runSummary;
 
 	if (run.description.length == 0)
 		run.description = null;
 
-	dbClient.query('insert into Runs set userID = ?, runID = ?, startTime = ?, distance = ?, '+
-					'duration = ?, calories = ?, howFelt = ?, weather = ?, terrain = ?, note = ?, '+
-					'minlat = ?, maxlat = ?, minlon = ?, maxlon = ?',
+	dbClient.query('replace Runs set userID = ?, runID = ?, startTime = ?, distance = ?, '+
+					'duration = ?, hasHRData = ?, calories = ?, howFelt = ?, weather = ?, ' + 
+					'terrain = ?, note = ?, minlat = ?, maxlat = ?, minlon = ?, maxlon = ?',
 					[userID, runID, new Date(summary.startTime), summary.distance*METERS_PER_MILE,
-					 summary.duration, summary.calories, felt[run.howFelt], weather[run.weather], terrain[run.terrain], run.description,
+					 summary.duration, run.hasHRData, summary.calories, felt[run.howFelt], weather[run.weather], terrain[run.terrain], run.description,
 					 minlat, maxlat, minlon, maxlon]);
 }
 
@@ -118,8 +127,17 @@ function convertRunData(user, run, dbClient) {
 		
 		if (runData.plusService.status === 'success') {
 			
-			//console.log(run.runID+': '+run.retryCount+' retries');
-		
+			if (run.hasHRData) {
+				var extData = runData.plusService.sportsData.extendedDataList.extendedData;
+				var hrData = null;
+				extData.forEach(function(item) {
+					if (item.dataType == 'heartRate')
+						hrData = item;
+				});
+				run.hasHRData = (hrData != null);
+				run.hrData = hrData;
+			}
+			
 			storeRunInDB(user.userID, run.runID, run, runData, dbClient);
 			
 			if (user.responses.length > 0) {
@@ -166,11 +184,14 @@ function parseXML(xmlString, callback) {
 					howFelt:		'',
 					weather:		'',
 					terrain:		'',
+					hasHRData:		false,
 					gpsData:		false,
 					inDB:			false,
 					retryCount:		0
 				};
 				runs.push(currentRun);
+			} else if (elem == 'heartrate') {
+				currentRun.hasHRData = true;
 			} else if (elem == 'runListSummary') {
 				currentRun = null;
 			}
