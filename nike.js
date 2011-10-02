@@ -127,7 +127,8 @@ function convertRunData(user, run, dbClient) {
 		
 		if (runData.plusService.status === 'success') {
 			
-			if (run.hasHRData) {
+			if (run.hasHRData && runData.plusService.sportsData.extendedDataList != undefined) {
+			
 				var extData = runData.plusService.sportsData.extendedDataList.extendedData;
 				var hrData = null;
 				extData.forEach(function(item) {
@@ -136,6 +137,10 @@ function convertRunData(user, run, dbClient) {
 				});
 				run.hasHRData = (hrData != null);
 				run.hrData = hrData;
+			} else {
+//				if (run.hasHRData)
+//					console.log('Run '+run.nikeID+' of user '+user.nikeID+' claims to have heartrate data but doesn\'t');
+				run.hasHRData = false;
 			}
 			
 			storeRunInDB(user.userID, run.runID, run, runData, dbClient);
@@ -146,6 +151,14 @@ function convertRunData(user, run, dbClient) {
 				user.runsDone.unshift(run);
 			}
 			
+			user.runsLeft -= 1;
+			
+			if (user.runsLeft == 0) {
+				user.dbClient.end();
+				delete user.dbClient;
+//				console.log('dbClient destroyed');
+			}
+						
 		} else {
 			if (run.retryCount < MAXRETRIES) {
 				run.retryCount += 1;
@@ -154,6 +167,13 @@ function convertRunData(user, run, dbClient) {
 				});
 			} else {
 				//console.log('giving up on '+run.runID+'...');
+				user.runsLeft -= 1;
+				
+				if (user.runsLeft == 0) {
+					user.dbClient.end();
+					delete user.dbClient;
+//					console.log('dbClient destroyed');
+				}
 			}
 		}
 	});
@@ -265,7 +285,9 @@ exports.makeUserRunList = function(userID, nikeID, response, dbClient) {
 					nikeID:		nikeID,
 					runs:		runs,
 					runsDone:	[],
-					responses:	[]
+					responses:	[],
+					dbClient:	dbClient,
+					runsLeft:	0
 				};
 				
 				users[nikeID] = user;
@@ -273,12 +295,17 @@ exports.makeUserRunList = function(userID, nikeID, response, dbClient) {
 				dbClient.query('select runID from Runs where userID = ?', [userID],
 					function(err, results, fields) {
 
+						var inDB = 0;
 						results.forEach(function(dbRun) {
 							runs.forEach(function(run) {
-								if (run.runID == dbRun.runID)
+								if (run.runID == dbRun.runID) {
 									run.inDB = true;
+									inDB += 1;
+								}
 							});
 						});
+
+						user.runsLeft = numGPS-inDB;
 
 						for (var i = 0; i < runs.length; i++) {
 							if (runs[i].gpsData && !runs[i].inDB)

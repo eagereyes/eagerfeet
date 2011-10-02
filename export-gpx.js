@@ -34,45 +34,53 @@ exports.exportGPX = function(dbClient, runID, response) {
 	
 	dbClient.query('select * from Runs where runID = ?', [runID], function(err, results, fields) {
 	
-		var run = results[0];
-		
-		var runName = 'Run '+run.runID+', '+run.startTime;
-		
-		var metadata = gpxNode.ele('metadata');
-		metadata.ele('name').txt(runName);
-			
-		var b = metadata.ele('bounds');
-		b.att('minlat', run.minlat);
-		b.att('maxlat', run.maxlat);
-		b.att('minlon', run.minlon);
-		b.att('maxlon', run.maxlon);
+		if (results.length > 0) {
 	
-		var trk = gpxNode.ele('trk');
-		
-		trk.ele('name').txt(runName);
-		trk.ele('time').txt(run.startTime);
-		trk.ele('type').txt('Run');
-		
-		var trkSeg = trk.ele('trkseg');
-		
-		dbClient.query('select lat, lon, ele, time from Waypoints where runID = ?', [runID], function(err, results, fields) {
+			var run = results[0];
 			
-			results.forEach(function(wp) {
-				var trkPt = trkSeg.ele('trkpt');
-				trkPt.att('lat', wp.lat);
-				trkPt.att('lon', wp.lon);
+			var runName = 'Run '+run.runID+', '+run.startTime;
+			
+			var metadata = gpxNode.ele('metadata');
+			metadata.ele('name').txt(runName);
 				
-				trkPt.ele('ele').txt(wp.ele);
+			var b = metadata.ele('bounds');
+			b.att('minlat', run.minlat);
+			b.att('maxlat', run.maxlat);
+			b.att('minlon', run.minlon);
+			b.att('maxlon', run.maxlon);
+		
+			var trk = gpxNode.ele('trk');
+			
+			trk.ele('name').txt(runName);
+			trk.ele('time').txt(run.startTime);
+			trk.ele('type').txt('Run');
+			
+			var trkSeg = trk.ele('trkseg');
+			
+			dbClient.query('select lat, lon, ele, time from Waypoints where runID = ?', [runID], function(err, results, fields) {
 				
-				trkPt.ele('time').txt(ISODateString(wp.time));
+				results.forEach(function(wp) {
+					var trkPt = trkSeg.ele('trkpt');
+					trkPt.att('lat', wp.lat);
+					trkPt.att('lon', wp.lon);
+					
+					trkPt.ele('ele').txt(wp.ele);
+					
+					trkPt.ele('time').txt(ISODateString(wp.time));
+				});
+				
+	//			console.log(gpxDoc.toString());
+				response.setHeader('Content-Disposition', 'attachment; filename=Run-'+fileNameDateString(run.startTime)+'.gpx');
+				response.setHeader('Content-Type', 'application/gpx+xml');
+				response.send(gpxDoc.toString());
+				
+				dbClient.end();
 			});
-			
-//			console.log(gpxDoc.toString());
-			response.setHeader('Content-Disposition', 'attachment; filename=Run-'+fileNameDateString(run.startTime)+'.gpx');
-			response.setHeader('Content-Type', 'application/gpx+xml');
-			response.send(gpxDoc.toString());
-			
-		});
+		} else {
+			console.log('run '+runID+' not found in GPX export');
+			response.send('<html><head><title>Not Found!</title></head><body><p>Run could not be retrieved from the database</p></body></html>');
+			dbClient.end();
+		}
 	});
 }
 
