@@ -49,28 +49,30 @@ function sendGPX(run, heartrates, paces, response, dbClient) {
 	gpxNode.att('xsi:schemaLocation', 'http://www.topografix.com/GPX/1/1 http://www.topografix.com/gpx/1/1/gpx.xsd\n'+
 		'http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd');
 
-		var runName = 'Run '+run.runID+', '+run.startTime;
-		
-		var metadata = gpxNode.ele('metadata');
-		metadata.ele('name').txt(runName);
-			
-		var b = metadata.ele('bounds');
-		b.att('minlat', run.minlat);
-		b.att('maxlat', run.maxlat);
-		b.att('minlon', run.minlon);
-		b.att('maxlon', run.maxlon);
+	var runName = 'Run '+run.runID+', '+run.startTime;
 	
-		var trk = gpxNode.ele('trk');
+	var metadata = gpxNode.ele('metadata');
+	metadata.ele('name').txt(runName);
 		
-		trk.ele('name').txt(runName);
-		trk.ele('time').txt(run.startTime);
-		trk.ele('type').txt('Run');
+	var b = metadata.ele('bounds');
+	b.att('minlat', run.minlat);
+	b.att('maxlat', run.maxlat);
+	b.att('minlon', run.minlon);
+	b.att('maxlon', run.maxlon);
+
+	var trk = gpxNode.ele('trk');
+	
+	trk.ele('name').txt(runName);
+	trk.ele('time').txt(run.startTime);
+	trk.ele('type').txt('Run');
+	
+	var trkSeg = trk.ele('trkseg');
+	
+	dbClient.query('select lat, lon, ele, time from Waypoints where runID = ?', [run.runID], function(err, results, fields) {
 		
-		var trkSeg = trk.ele('trkseg');
-		
-		dbClient.query('select lat, lon, ele, time from Waypoints where runID = ?', [runID], function(err, results, fields) {
-			
 		var startTime = results[0].time;
+		
+		var hrOffset = 0;
 		
 		results.forEach(function(wp) {
 			var trkPt = trkSeg.ele('trkpt');
@@ -80,26 +82,25 @@ function sendGPX(run, heartrates, paces, response, dbClient) {
 			trkPt.ele('ele').txt(wp.ele);
 			
 			trkPt.ele('time').txt(ISODateString(wp.time));
-			
+						
 			if (heartrates) {
 				var offset = (wp.time-startTime)/1000;
-				var i = 0;
-				while ((i < heartrates.length-1) && (heartrates[i+1].offset <= offset)) {
-					i += 1;
+				while ((hrOffset < heartrates.length-1) && (heartrates[hrOffset+1].offset <= offset)) {
+					hrOffset += 1;
 				}
 				
 				var ext = trkPt.ele('extensions');
 				var trkPtExt = ext.ele('gpxtpx:TrackPointExtension');
-				trkPtExt.ele('gpxtpx:hr').txt(''+heartrates[i].heartrate);
+				trkPtExt.ele('gpxtpx:hr').txt(''+heartrates[hrOffset].heartrate);
 			}
 		});
-		
-//			console.log(gpxDoc.toString());
+	//			console.log(gpxDoc.toString());
 		response.setHeader('Content-Disposition', 'attachment; filename=Run-'+fileNameDateString(run.startTime)+'.gpx');
 		response.setHeader('Content-Type', 'application/gpx+xml');
 		response.send(gpxDoc.toString());
 		
 		dbClient.end();
+	});
 }
 
 exports.exportGPX = function(dbClient, runID, response) {
