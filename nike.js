@@ -169,8 +169,8 @@ function convertRunData(user, run, dbClient) {
 			user.runsLeft -= 1;
 			
 			if (user.runsLeft == 0) {
-				user.dbClient.end();
-				delete user.dbClient;
+//				user.dbClient.end();
+//				delete user.dbClient;
 //				console.log('dbClient destroyed');
 			}
 						
@@ -185,8 +185,8 @@ function convertRunData(user, run, dbClient) {
 				user.runsLeft -= 1;
 				
 				if (user.runsLeft == 0) {
-					user.dbClient.end();
-					delete user.dbClient;
+//					user.dbClient.end();
+//					delete user.dbClient;
 //					console.log('dbClient destroyed');
 				}
 			}

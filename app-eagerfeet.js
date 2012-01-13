@@ -23,13 +23,15 @@ var gpx = require('./export-gpx.js');
 
 var dbconf = require('./db-conf.js').dbconf;
 
+var dbClient;
+
 var APIPREFIX = '/api/';
 
 var users = {};
 
 var maxUserID = 1000;
 
-function loadUsers(dbClient) {
+function loadUsers() {
 	dbClient.query('select * from Users', function(err, results, fields) {
 		results.forEach(function(user) {
 			users[user.userID] = user;
@@ -72,9 +74,7 @@ process.on('uncaughtException', function (err) {
 
 var app = express.createServer();
 
-app.get(APIPREFIX+'runs/:userID', function(req, res) {
-	var dbClient = mysql.createClient(dbconf);
-	
+app.get(APIPREFIX+'runs/:userID', function(req, res) {	
 	var user = findUserByNikeID(req.params.userID, dbClient);
 	if (user == null) {
 		user = newUserWithNikeID(req.params.userID, dbClient);
@@ -87,12 +87,17 @@ app.get(APIPREFIX+'poll/:userID', function(req, res) {
 });
 
 app.get(APIPREFIX+'getGPX/:runID', function(req, res) {
-	gpx.exportGPX(mysql.createClient(dbconf), req.params.runID, res);
+	gpx.exportGPX(dbClient, req.params.runID, res);
 });
 
 app.get(APIPREFIX+'ping', function(req, res) {
-	res.setHeader('Cache-Control', 'no-store');
-	res.send('OK\n');
+	dbClient.query('select * from Users', function(err, results, fields) {
+		res.setHeader('Cache-Control', 'no-store');
+		if (err)
+			res.send('DB Down!\n');
+		else
+			res.send('OK\n');
+	});
 });
 
 app.get(APIPREFIX+'rk/authData', function(req, res) {
@@ -107,6 +112,6 @@ app.get(APIPREFIX+'rk/login', function(req, res) {
 //	res.send('Success!\n');
 });
 
-
-loadUsers(mysql.createClient(dbconf));
+dbClient = mysql.createClient(dbconf);
+loadUsers();
 app.listen(5555);

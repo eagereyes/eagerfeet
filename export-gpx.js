@@ -99,7 +99,7 @@ function sendGPX(run, heartrates, paces, response, dbClient) {
 		response.setHeader('Content-Type', 'application/gpx+xml');
 		response.send(gpxDoc.toString());
 		
-		dbClient.end();
+//		dbClient.end();
 	});
 }
 
@@ -123,7 +123,7 @@ exports.exportGPX = function(dbClient, runID, response) {
 		} else {
 			console.log('run '+runID+' not found in GPX export');
 			response.send('<html><head><title>Not Found!</title></head><body><p>Run could not be retrieved from the database</p></body></html>');
-			dbClient.end();
+//			dbClient.end();
 		}
 	});
 }
