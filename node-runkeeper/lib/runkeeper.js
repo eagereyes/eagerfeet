@@ -95,7 +95,7 @@ for (func_name in API) {
 			    console.log("ERROR\n" + error);
 			    console.log("RESPONSE\n" + response);
 			    console.log("BODY\n" + body);
-			    callback(JSON.parse(body));
+			    callback(body);
 			});
 	    }; 
 	})(func_name);

@@ -1,0 +1,46 @@
+CREATE TABLE `Users` (
+  `userID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `nikeID` varchar(30) DEFAULT NULL,
+  `runkeeperUserID` int(11) DEFAULT NULL,
+  `runkeeperToken` varchar(32) DEFAULT NULL,
+  PRIMARY KEY (`userID`),
+  KEY `nikeID` (`nikeID`),
+  KEY `runkeeperUserID` (`runkeeperUserID`)
+) ENGINE=MyISAM AUTO_INCREMENT=1120 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `Runs` (
+  `runID` varchar(30) NOT NULL DEFAULT '',
+  `userID` int(11) NOT NULL,
+  `startTime` datetime NOT NULL,
+  `distance` int(11) NOT NULL,
+  `duration` int(11) NOT NULL,
+  `hasHRData` tinyint(1) NOT NULL DEFAULT '0',
+  `hasPaceData` tinyint(1) NOT NULL DEFAULT '0',
+  `calories` int(11) DEFAULT NULL,
+  `howFelt` varchar(20) DEFAULT NULL,
+  `weather` varchar(20) DEFAULT NULL,
+  `terrain` varchar(20) DEFAULT NULL,
+  `note` varchar(300) DEFAULT NULL,
+  `minlat` float DEFAULT NULL,
+  `maxlat` float DEFAULT NULL,
+  `minlon` float DEFAULT NULL,
+  `maxlon` float DEFAULT NULL,
+  PRIMARY KEY (`runID`),
+  KEY `userID` (`userID`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `Waypoints` (
+  `runID` varchar(16) NOT NULL DEFAULT '',
+  `time` datetime NOT NULL,
+  `lat` char(12) NOT NULL DEFAULT '',
+  `lon` char(12) NOT NULL DEFAULT '',
+  `ele` char(12) NOT NULL DEFAULT '',
+  PRIMARY KEY (`runID`,`time`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `Heartrates` (
+  `runID` varchar(30) NOT NULL DEFAULT '',
+  `offset` int(11) NOT NULL,
+  `heartrate` int(11) NOT NULL,
+  PRIMARY KEY (`runID`,`offset`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;

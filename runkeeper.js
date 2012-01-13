@@ -14,7 +14,6 @@
 	OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-require.paths.unshift('./node-runkeeper/runkeeper/lib');
 
 var runkeeper = require('./node-runkeeper/lib/runkeeper');
 

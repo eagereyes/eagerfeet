@@ -19,7 +19,7 @@ var mysql = require('mysql');
 
 var runkeeper = require('./runkeeper.js');
 var nike = require('./nike.js');
-var export = require('./export-gpx.js');
+var gpx = require('./export-gpx.js');
 
 var dbconf = require('./db-conf.js').dbconf;
 
@@ -87,7 +87,7 @@ app.get(APIPREFIX+'poll/:userID', function(req, res) {
 });
 
 app.get(APIPREFIX+'getGPX/:runID', function(req, res) {
-	export.exportGPX(mysql.createClient(dbconf), req.params.runID, res);
+	gpx.exportGPX(mysql.createClient(dbconf), req.params.runID, res);
 });
 
 app.get(APIPREFIX+'ping', function(req, res) {

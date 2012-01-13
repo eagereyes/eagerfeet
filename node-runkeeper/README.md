@@ -54,7 +54,7 @@ var options = exports.options = {
 
 };
 
-var runkeeper = require('support/runkeeper/lib/runkeeper');
+var runkeeper = require('./support/runkeeper/lib/runkeeper');
 
 var client = new runkeeper.HealthGraph(options);
 
@@ -62,13 +62,20 @@ var client = new runkeeper.HealthGraph(options);
 
 ## Using the client
 
-Get user profile information
+Using any of the client's API methods assumes that it has a valid access_token. Once the Health Graph API issues your application an authorization code ([see here](http://developer.runkeeper.com/healthgraph/registration-authorization) for more information on registering an application with the Health Graph), you can request an access token.
 
 ```javascript
-client.profile( function(data) {
-  // data returned in JSON with format depending on type of call
-  var obj = JSON.parse(data);
+client.getNewToken(authorization_code, function(access_token) {
+  client.access_token = access_token;
+
+  // Now you're free to do whatever you'd like with the client.
+
+  // e.g. Get user profile information
+  client.profile(function(data) {
+    // data returned in JSON with format depending on type of call
+    var obj = JSON.parse(data);
 });
+})
 ```
 
 
