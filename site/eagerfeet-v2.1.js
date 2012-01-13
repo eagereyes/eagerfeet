@@ -147,9 +147,22 @@ function lookup() {
 	$('#alert').hide();
 	$('#progress').show();
 	$('#submit').addClass('disabled');
-	var match = $('#userID')[0].value.match(/(\d+)/);
+	var components = $('#userID')[0].value.split('/');
+	var match = null;
+    var i = 0;
+    while (i < components.length && match == null) {
+	  var numeric = components[i].match(/(\d+)/);
+	  if (numeric != null) {
+	  	match = numeric[0];
+	  }
+	  var hex = components[i].match(/([A-Za-z\d-]+)/);
+	  if (hex != null && hex[0].indexOf('-') > 0) {
+	  	match = hex[0];
+	  }
+	  i += 1;
+	}
 	if (match != null) {
-		var userID = match[0];
+		var userID = match;
 		$('#userID')[0].value = userID;
 		$.get(APIPREFIX+'runs/'+userID, function(data) {
 			$('#progress').hide();

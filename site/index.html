@@ -12,8 +12,8 @@
     <![endif]-->
 
     <!-- Le styles -->
-    <link href="bootstrap-1.3.0.min.css" rel="stylesheet">
-	<link href="eagerfeet.css" rel="stylesheet">
+    <link href="bootstrap-1.4.0.min.css" rel="stylesheet">
+	<link href="eagerfeet-v2.css" rel="stylesheet">
 
     <!-- Le fav and touch icons -->
 <!--    <link rel="shortcut icon" href="images/favicon.ico">
@@ -21,8 +21,8 @@
     <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
     <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png"> -->
 
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript"></script>
-	<script src="eagerfeet.js" type="text/javascript"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+	<script src="eagerfeet-v2.1.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
 			$('#email').attr('href', 'mailto:'+window.location.hostname.slice(0,-4)+'@me.com');
@@ -68,10 +68,6 @@
         
           <!-- Le main content -->
           <div class="span10">
-          	<div id="info" class="alert-message warning">
-          	  <a class="close" href="#" onclick="$('#info').hide(); return false;">&times;</a>
-          	  <p>If you exported runs on September 27, 28, or 29, please <a href="http://blog.eagerfeet.org/post/10811000957/precision-errors-fixed" target="_blank">see this blog posting about precision problems in the resulting files</a>. These are now fixed, so any files you export going forward will be correct.</p>
-          	</div>
             <p>Enter your <b>numeric</b> Nike+ ID (or a URL containing it):</p>
             <form onsubmit="lookup(); return false;">
 	            <input type="text" name="userID" id="userID" value="" class="span8" />
@@ -134,5 +130,18 @@
 	<script type="text/javascript">try{ clicky.init(66409777); }catch(e){}</script>
 	<noscript><p><img alt="Clicky" width="1" height="1" src="http://in.getclicky.com/66409777ns.gif" /></p></noscript>
 	<!-- End of tracking code -->
+<script type="text/javascript">
+  var _gauges = _gauges || [];
+  (function() {
+    var t   = document.createElement('script');
+    t.type  = 'text/javascript';
+    t.async = true;
+    t.id    = 'gauges-tracker';
+    t.setAttribute('data-site-id', '4ef430c8613f5d6715000004');
+    t.src = '//secure.gaug.es/track.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(t, s);
+  })();
+</script>
   </body>
 </html>
