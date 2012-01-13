@@ -33,6 +33,19 @@
 			if (getCookie('unit') == 'km')
 				$('#units_km').attr('checked', 'checked');
 			$.ajaxSetup({timeout: 310000});
+			$.get(APIPREFIX+'ping', function(data) {
+				if (data.indexOf('OK') >= 0) {
+					$('#runs').html('<p>Server is alive and well.</p>');
+				} else {
+					$('#errormsg').html('<p>Server is currently down. Please try again later.</p>');
+					$('#alert').show();
+					clicky.log('/#dbdown', 'Database down');
+				}
+			}).error(function() {
+				$('#errormsg').html('<p>Server is currently down. Please try again later.</p>');
+				$('#alert').show();
+				clicky.log('/#serverdown', 'Server down');
+			});
 		});
 	</script>
   </head>
