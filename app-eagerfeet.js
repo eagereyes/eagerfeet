@@ -91,12 +91,15 @@ app.get(APIPREFIX+'getGPX/:runID', function(req, res) {
 });
 
 app.get(APIPREFIX+'ping', function(req, res) {
-	dbClient.query('select * from Users', function(err, results, fields) {
+	dbClient.query('select max(distance) as maxDistance, sum(distance) as sumDistance, count(*) as runCount from Runs', function(err, results, fields) {
 		res.setHeader('Cache-Control', 'no-store');
 		if (err)
-			res.send('DB Down!\n');
-		else
-			res.send('OK\n');
+			res.send(JSON.stringify({status: 'DB Down!'}));
+		else {
+			var dataObject = results[0];
+			dataObject.status = 'OK';
+			res.send(JSON.stringify(dataObject));
+		}
 	});
 });
 

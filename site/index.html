@@ -30,12 +30,16 @@
 			if (userID) {
 				$('#userID')[0].value = userID;
 			}
-			if (getCookie('unit') == 'km')
+			var units = getCookie('unit');
+			if (units == 'km')
 				$('#units_km').attr('checked', 'checked');
+			setUnit(units);
+						
 			$.ajaxSetup({timeout: 310000});
 			$.get(APIPREFIX+'ping', function(data) {
 				if (data.indexOf('OK') >= 0) {
-					$('#runs').html('<p>Server is alive and well.</p>');
+					data = JSON.parse(data);
+					$('#runs').html('<p>Runs exported: <b>' + data.runCount + '</b><br/>Total distance: <b>' + formatDistance(data.sumDistance/1000, 0) + '</b> (that\'s '+(data.sumDistance/40075160).toFixed(2)+' times around the earth!)<br/>Average per run: <b>' + formatDistance(data.sumDistance/data.runCount/1000, 2) + '</b><br/>Longest run: <b>' +formatDistance(data.maxDistance/1000, 2) + '</b></p>');
 				} else {
 					$('#errormsg').html('<p>Server is currently down. Please try again later.</p>');
 					$('#alert').show();

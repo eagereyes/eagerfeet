@@ -82,11 +82,11 @@ function formatDuration(duration) {
 		return pad(minutes) + ':' + pad(seconds);
 }
 
-function formatDistance(distance) {
+function formatDistance(distance, decimals) {
 	if (unit == 'mi')
-		return parseFloat(distance/1.609344).toFixed(2) + ' mi';
+		return parseFloat(distance/1.609344).toFixed(decimals) + ' mi';
 	else
-		return parseFloat(distance).toFixed(2) + ' km';
+		return parseFloat(distance).toFixed(decimals) + ' km';
 }
 
 function setCookie(name, value, days) {
@@ -121,7 +121,7 @@ function setUnit(newUnit) {
 	setCookie('unit', unit, 10000);
 	var distanceSpans = $('.distance');
 	for (var i = 0; i < runs.length; i++) {
-		distanceSpans[i].innerHTML = formatDistance(runs[i].distance);
+		distanceSpans[i].innerHTML = formatDistance(runs[i].distance, 2);
 	}
 }
 
@@ -145,6 +145,7 @@ function lookup() {
 		unit = cookieUnit;
 	}
 	$('#alert').hide();
+	$('#runs').hide();
 	$('#progress').show();
 	$('#submit').addClass('disabled');
 	var components = $('#userID')[0].value.split('/');
@@ -190,7 +191,7 @@ function lookup() {
 					}
 					html += '<p><span class="title">Run '+formatDate(date)+'</span>, '+formatTime(date);
 					html += '</p>';
-					html += '<p><span class="distance">'+formatDistance(run.distance)+'</span>';
+					html += '<p><span class="distance">'+formatDistance(run.distance, 2)+'</span>';
 					html += ', ' + formatDuration(run.duration);
 					if (run.calories > 0)
 						html += ', ' + Math.round(run.calories) + ' calories';
@@ -207,6 +208,7 @@ function lookup() {
 					html += '</div>\n';
 				}
 				$('#runs').html(html);
+				$('#runs').show();
 				clicky.log('/#success/'+data.runs.length+'/'+gpsLinks,
 					'Success: '+data.runs.length+' runs, '+gpsLinks+' with GPS data');
 				setCookie('userID', userID, 90);
