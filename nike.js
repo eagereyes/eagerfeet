@@ -125,7 +125,7 @@ function storeRunInDB(userID, runID, run, runData, dbClient) {
 	dbClient.query('replace Runs set userID = ?, runID = ?, startTime = ?, distance = ?, '+
 					'duration = ?, hasHRData = ?, calories = ?, howFelt = ?, weather = ?, ' + 
 					'terrain = ?, note = ?, minlat = ?, maxlat = ?, minlon = ?, maxlon = ?',
-					[userID, runID, new Date(summary.startTime), summary.distance*METERS_PER_MILE,
+					[userID, runID, new Date(summary.startTime), summary.distance*1000,
 					 summary.duration, run.hasHRData, summary.calories, felt[run.howFelt], weather[run.weather], terrain[run.terrain], run.description,
 					 minlat, maxlat, minlon, maxlon]);
 }
