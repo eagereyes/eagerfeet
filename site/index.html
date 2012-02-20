@@ -30,9 +30,10 @@
 			if (userID) {
 				$('#userID')[0].value = userID;
 			}
-			var units = getCookie('unit');
+			var units = getCookie('unit') || 'mi';
 			if (units == 'km')
 				$('#units_km').attr('checked', 'checked');
+			
 			setUnit(units);
 						
 			$.ajaxSetup({timeout: 310000});
