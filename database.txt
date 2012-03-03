@@ -25,8 +25,12 @@ CREATE TABLE `Runs` (
   `maxlat` float DEFAULT NULL,
   `minlon` float DEFAULT NULL,
   `maxlon` float DEFAULT NULL,
+  `hasGPSData` tinyint(1) NOT NULL DEFAULT '1',
+  `dateAdded` datetime DEFAULT NULL,
+  `md5sum` char(32) DEFAULT NULL,
   PRIMARY KEY (`runID`),
-  KEY `userID` (`userID`)
+  KEY `userID` (`userID`),
+  KEY `distance` (`distance`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Waypoints` (

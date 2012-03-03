@@ -13,18 +13,17 @@ The server is written using [node.js](http://nodejs.org). It requires the follow
 
 ## Database
 
-The site now logs its data in a sqlite database called `runs.db` (user and run IDs are hashed for privacy). The statement to create the runs table in that database is:
+The site now keeps its data in a MySQL database. The credentials necessary for its use are stored in a JavaScript file called `db-conf.js` that looks like this:
 
-````sql
-CREATE TABLE "runs" (
-	"runID" TEXT PRIMARY KEY ON CONFLICT REPLACE,
-	"userID" TEXT,
-	"date" TEXT,
-	"latitude" REAL,
-	"longitude" REAL,
-	"distance" REAL DEFAULT 0
-)
+````javascript
+exports.dbconf = {
+	user:		'<db-username>',
+	password:	'<db-password>',
+	database:	'<database>'
+}
 ````
+
+ The database schema is described in `database.txt`.
 
 ## License
 

@@ -20,3 +20,8 @@ Finally add in direct RunKeeper transfer
 Find a way to render a map of runs into an image offline, e.g., once every few hours or once per day
 
 Refactor, refactor, refactor.
+
+Testing:
+* Mocha, http://visionmedia.github.com/mocha/
+* Chai, http://chaijs.com/
+* Maybe SiNon, https://github.com/cjohansen/sinon.js
