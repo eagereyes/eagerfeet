@@ -220,7 +220,7 @@ function parseXML(xmlString, callback) {
 					weather:		'',
 					terrain:		'',
 					hasHRData:		false,
-					gpsData:		false,
+					hasGPSData:		false,
 					inDB:			false,
 					retryCount:		0
 				};
@@ -248,7 +248,7 @@ function parseXML(xmlString, callback) {
 				} else if (enclosingElement == 'terrain') {
 					currentRun.terrain += chars;
 				} else if (enclosingElement == 'gpxId') {
-					currentRun.gpsData = true;
+					currentRun.hasGPSData = true;
 				}
 			} else if (enclosingElement == 'status') {
 				status += chars;
@@ -291,7 +291,7 @@ exports.makeUserRunList = function(userID, nikeID, response, dbClient) {
 				
 				var numGPS = 0;
 				runs.forEach(function(run) {
-					if (run.gpsData)
+					if (run.hasGPSData)
 						numGPS += 1;
 				});
 								
@@ -323,8 +323,19 @@ exports.makeUserRunList = function(userID, nikeID, response, dbClient) {
 						user.runsLeft = numGPS-inDB;
 
 						for (var i = 0; i < runs.length; i++) {
-							if (runs[i].gpsData && !runs[i].inDB)
-								convertRunData(user, runs[i], dbClient);
+							if (!runs[i].inDB) {
+								if (runs[i].hasGPSData) {
+									convertRunData(user, runs[i], dbClient);
+								} else {
+									var run = runs[i];
+									
+									description = run.description;
+									if (description.length == 0)
+										description = null;
+									dbClient.query('insert ignore into Runs set userID = ?, runID = ?, startTime = ?, distance = ?, duration = ?, calories = ?, howFelt = ?, weather = ?, terrain = ?, note = ?, hasGPSData = 0, dateAdded = NOW()',
+										[userID, run.runID, new Date(run.startTime), run.distance*1000, run.duration, run.calories, felt[+run.howFelt], weather[+run.weather], terrain[+run.terrain], description]);
+								}
+							}
 						}
 						
 						response.setHeader('Cache-Control', 'no-store');

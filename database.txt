@@ -31,7 +31,8 @@ CREATE TABLE `Runs` (
   `md5sum` char(32) DEFAULT NULL,
   PRIMARY KEY (`runID`),
   KEY `userID` (`userID`),
-  KEY `distance` (`distance`)
+  KEY `distance` (`distance`),
+  KEY `hasGPSData` (`hasGPSData`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Waypoints` (

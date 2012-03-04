@@ -92,7 +92,7 @@ app.get(APIPREFIX+'getGPX/:runID', function(req, res) {
 });
 
 app.get(APIPREFIX+'ping', function(req, res) {
-	dbClient.query('select max(distance) as maxDistance, sum(distance) as sumDistance, count(*) as runCount from Runs', function(err, results, fields) {
+	dbClient.query('select max(distance) as maxDistance, sum(distance) as sumDistance, count(*) as runCount from Runs where hasGPSData = 1', function(err, results, fields) {
 		res.setHeader('Cache-Control', 'no-store');
 		if (err)
 			res.send(JSON.stringify({status: 'DB Down!'}));

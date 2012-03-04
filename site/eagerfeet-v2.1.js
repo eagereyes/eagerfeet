@@ -178,7 +178,7 @@ function lookup() {
 					var run = data.runs[i];
 					date.setISO8601(run.startTime);
 					html += '<div class="run">';
-					if (!run.gpsData)
+					if (!run.hasGPSData)
 						html += '<div class="download">no GPS data</i></div>';
 					else {
 						html += '<div class="download"><a class="btn ';
