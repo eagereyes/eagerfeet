@@ -60,7 +60,8 @@ function newUserWithNikeID(nikeID, dbClient) {
 	
 	users[maxUserID] = newUser;
 	
-	dbClient.query('insert into Users set userID = ?, nikeID = ?', [maxUserID, nikeID]);
+	dbClient.query('insert into Users set userID = ?, nikeID = ?, dateAdded = NOW()',
+						[maxUserID, nikeID]);
 	
 	return newUser;
 }

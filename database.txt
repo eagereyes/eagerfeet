@@ -1,12 +1,13 @@
 CREATE TABLE `Users` (
   `userID` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `nikeID` varchar(30) DEFAULT NULL,
+  `nikeID` varchar(50) DEFAULT NULL,
   `runkeeperUserID` int(11) DEFAULT NULL,
   `runkeeperToken` varchar(32) DEFAULT NULL,
+  `dateAdded` datetime DEFAULT NULL,
   PRIMARY KEY (`userID`),
   KEY `nikeID` (`nikeID`),
   KEY `runkeeperUserID` (`runkeeperUserID`)
-) ENGINE=MyISAM AUTO_INCREMENT=1120 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=3294 DEFAULT CHARSET=utf8;
 
 CREATE TABLE `Runs` (
   `runID` varchar(30) NOT NULL DEFAULT '',
