@@ -127,7 +127,7 @@ function setUnit(newUnit) {
 
 function pollRuns(data) {
 	if (data.code == 0) {
-		$('#'+data.runID).removeClass('disabled').addClass('success').attr('href', APIPREFIX+'getGPX/'+data.runID);
+		$('#'+data.runID).removeClass('disabled').addClass('success').attr('href', APIPREFIX+'getGPX/'+data.md5sum);
 		$.get(APIPREFIX+'poll/'+data.userID, pollRuns);
 	}
 }
@@ -183,7 +183,7 @@ function lookup() {
 					else {
 						html += '<div class="download"><a class="btn ';
 						if (run.inDB)
-							html += 'success" href="'+APIPREFIX+'getGPX/'+run.runID+'"';
+							html += 'success" href="'+APIPREFIX+'getGPX/'+run.md5sum+'"';
 						else
 							html += 'disabled" ';
 						html += 'id="'+run.runID+'">Download GPX File</a></div>';

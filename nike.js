@@ -17,6 +17,8 @@
 var xml = require("node-xml");
 var http = require('http');
 
+var md5sum = require('./md5sum');
+
 var RUNLISTSERVER = 'nikerunning.nike.com';
 
 var RUNLISTPATH = '/nikeplus/v2/services/app/run_list.jsp?userID=';
@@ -122,12 +124,14 @@ function storeRunInDB(userID, runID, run, runData, dbClient) {
 	if (run.description.length == 0)
 		run.description = null;
 
+	var now = new Date();
+
+	run.md5sum = md5sum.md5sumRun(runID, userID, new Date(summary.startTime), summary.distance*1000, summary.duration, summary.calories, felt[run.howFelt], weather[run.weather], terrain[run.terrain], run.description, minlat, minlon, now);
+
 	dbClient.query('replace Runs set userID = ?, runID = ?, startTime = ?, distance = ?, '+
 					'duration = ?, hasHRData = ?, calories = ?, howFelt = ?, weather = ?, ' + 
-					'terrain = ?, note = ?, minlat = ?, maxlat = ?, minlon = ?, maxlon = ?, dateAdded = NOW()',
-					[userID, runID, new Date(summary.startTime), summary.distance*1000,
-					 summary.duration, run.hasHRData, summary.calories, felt[run.howFelt], weather[run.weather], terrain[run.terrain], run.description,
-					 minlat, maxlat, minlon, maxlon]);
+					'terrain = ?, note = ?, minlat = ?, maxlat = ?, minlon = ?, maxlon = ?, dateAdded = ?, md5sum = ?',
+					[userID, runID, new Date(summary.startTime), summary.distance*1000, summary.duration, run.hasHRData, summary.calories, felt[run.howFelt], weather[run.weather], terrain[run.terrain], run.description, minlat, maxlat, minlon, maxlon, now, run.md5sum]);
 }
 
 function convertRunData(user, run, dbClient) {
@@ -307,7 +311,7 @@ exports.makeUserRunList = function(userID, nikeID, response, dbClient) {
 				
 				users[nikeID] = user;
 
-				dbClient.query('select runID from Runs where userID = ?', [userID],
+				dbClient.query('select runID, md5sum from Runs where userID = ?', [userID],
 					function(err, results, fields) {
 
 						var inDB = 0;
@@ -316,6 +320,7 @@ exports.makeUserRunList = function(userID, nikeID, response, dbClient) {
 								if (run.runID == dbRun.runID) {
 									run.inDB = true;
 									inDB += 1;
+									run.md5sum = dbRun.md5sum;
 								}
 							});
 						});
@@ -332,8 +337,13 @@ exports.makeUserRunList = function(userID, nikeID, response, dbClient) {
 									description = run.description;
 									if (description.length == 0)
 										description = null;
-									dbClient.query('insert ignore into Runs set userID = ?, runID = ?, startTime = ?, distance = ?, duration = ?, calories = ?, howFelt = ?, weather = ?, terrain = ?, note = ?, hasGPSData = 0, dateAdded = NOW()',
-										[userID, run.runID, new Date(run.startTime), run.distance*1000, run.duration, run.calories, felt[+run.howFelt], weather[+run.weather], terrain[+run.terrain], description]);
+										
+									var now = new Date();
+									
+									run.md5sum = md5sum.md5sumRun(run.runID, userID, new Date(run.startTime), run.distance*1000, run.duration, run.calories, felt[run.howFelt], weather[run.weather], terrain[run.terrain], description, null, null, now);	
+									
+									dbClient.query('insert ignore into Runs set userID = ?, runID = ?, startTime = ?, distance = ?, duration = ?, calories = ?, howFelt = ?, weather = ?, terrain = ?, note = ?, hasGPSData = 0, dateAdded = ?, md5sum = ?',
+										[userID, run.runID, new Date(run.startTime), run.distance*1000, run.duration, run.calories, felt[run.howFelt], weather[run.weather], terrain[run.terrain], description, now, run.md5sum]);
 								}
 							}
 						}
@@ -356,6 +366,7 @@ function sendRun(response, run, userID) {
 	response.send({
 		code:	0,
 		runID:	run.runID,
+		md5sum:	run.md5sum,
 		userID:	userID
 	});
 }

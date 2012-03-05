@@ -105,7 +105,7 @@ function sendGPX(run, heartrates, paces, response, dbClient) {
 
 exports.exportGPX = function(dbClient, runID, response) {
 	
-	dbClient.query('select * from Runs where runID = ?', [runID], function(err, results, fields) {
+	dbClient.query('select * from Runs where md5sum = ? and hasGPSData = 1', [runID], function(err, results, fields) {
 	
 		if (results.length > 0) {
 	
