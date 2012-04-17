@@ -103,7 +103,7 @@ function sendGPX(run, heartrates, paces, response, dbClient) {
 	});
 }
 
-exports.exportGPX = function(dbClient, md5sum, response) {
+exports.exportGPX = function(dbClient, md5sum, response, log) {
 	
 	dbClient.query('select * from Runs where md5sum = ? and hasGPSData = 1', [md5sum], function(err, results, fields) {
 	
@@ -121,7 +121,7 @@ exports.exportGPX = function(dbClient, md5sum, response) {
 				sendGPX(run, null, null, response, dbClient);
 			}
 		} else {
-			console.log('run '+md5sum+' not found in GPX export');
+			log.error('Run not found in GPX export', {md5sum: md5sum});
 			response.send('<html><head><title>Not Found!</title></head><body><p>Run could not be retrieved from the database</p></body></html>');
 //			dbClient.end();
 		}
