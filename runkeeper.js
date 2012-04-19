@@ -15,7 +15,7 @@
 */
 
 
-var runkeeper = require('./node-runkeeper/lib/runkeeper');
+var runkeeper = require('runkeeper');
 
 options = require('./rk-config.js').options;
 
