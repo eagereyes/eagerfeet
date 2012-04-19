@@ -70,7 +70,8 @@ function newUserWithNikeID(nikeID, dbClient) {
 }
 
 process.on('uncaughtException', function (err) {
-	log.error('Uncaught exception', {exception: err, timestamp: new Date()});
+	console.log('Uncaught exception: '+err);
+	log.error('Uncaught exception', {exception: err, errString: ''+err, timestamp: new Date()});
 });
 
 var app = express.createServer();
@@ -114,6 +115,8 @@ app.get(APIPREFIX+'ping', function(req, res) {
 //	runkeeper.getToken(req.query.code, res);
 //	res.send('Success!\n');
 //});
+
+log.info('=== App restarted ===');
 
 dbClient = mysql.createClient(dbconf);
 loadUsers();

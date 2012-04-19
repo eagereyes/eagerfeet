@@ -116,6 +116,8 @@ function storeRunInDB(userID, runID, run, runData, dbClient, log) {
 	if (numWaypoints == 0) {
 		log.warn('Run has no GPS data', {runID: runID});
 		return false;
+	} else {
+		log.info('Storing run', {runID: runID, numWaypoints: numWaypoints});
 	}
 
 	if (run.hasHRData) {
@@ -321,7 +323,6 @@ exports.makeUserRunList = function(userID, nikeID, response, dbClient, log) {
 				dbClient.query('select runID, md5sum from Runs where userID = ?', [userID],
 					function(err, results, fields) {
 
-						//var loopStart = new Date();
 						var inDB = 0;
 						results.forEach(function(dbRun) {
 							runs.forEach(function(run) {
@@ -341,18 +342,18 @@ exports.makeUserRunList = function(userID, nikeID, response, dbClient, log) {
 									convertRunData(user, runs[i], dbClient, log);
 								} else {
 									
-									var run = runs[i];
-									
-									description = run.description;
-									if (description.length == 0)
-										description = null;
-										
-									var now = new Date();
-									
-									run.md5sum = md5sum.md5sumRun(run.runID, userID, new Date(run.startTime), run.distance*1000, run.duration, run.calories, felt[run.howFelt], weather[run.weather], terrain[run.terrain], description, null, null, now);	
-									
-									dbClient.query('insert ignore into Runs set userID = ?, runID = ?, startTime = ?, distance = ?, duration = ?, calories = ?, howFelt = ?, weather = ?, terrain = ?, note = ?, hasGPSData = 0, dateAdded = ?, md5sum = ?',
-										[userID, run.runID, new Date(run.startTime), run.distance*1000, run.duration, run.calories, felt[run.howFelt], weather[run.weather], terrain[run.terrain], description, now, run.md5sum]);
+//									var run = runs[i];
+//									
+//									description = run.description;
+//									if (description.length == 0)
+//										description = null;
+//										
+//									var now = new Date();
+//									
+//									run.md5sum = md5sum.md5sumRun(run.runID, userID, new Date(run.startTime), run.distance*1000, run.duration, run.calories, felt[run.howFelt], weather[run.weather], terrain[run.terrain], description, null, null, now);	
+//									
+//									dbClient.query('insert ignore into Runs set userID = ?, runID = ?, startTime = ?, distance = ?, duration = ?, calories = ?, howFelt = ?, weather = ?, terrain = ?, note = ?, hasGPSData = 0, dateAdded = ?, md5sum = ?',
+//										[userID, run.runID, new Date(run.startTime), run.distance*1000, run.duration, run.calories, felt[run.howFelt], weather[run.weather], terrain[run.terrain], description, now, run.md5sum]);
 								}
 							}
 						}
