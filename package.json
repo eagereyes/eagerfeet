@@ -1,0 +1,13 @@
+{
+    "name": "application-name"
+  , "version": "0.0.1"
+  , "private": true
+  , "dependencies": {
+      "express": ">= 2.5.9"
+    , "jade": ">= 0.0.1"
+    , "mysql": ">= 0.9.6"
+    , "jog": ">= 0.3.0"
+    , "connect-memcached": ">= 0.0.3"
+    , "node-runkeeper": ">= 0.1.4"
+  }
+}

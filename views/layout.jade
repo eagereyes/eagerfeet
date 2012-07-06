@@ -1,0 +1,48 @@
+!!! html
+html(lang="en")
+	head
+		meta(charset='utf-8')
+		title= title
+		meta(name='viewport', content='width=device-width, initial-scale=1.0')
+		link(rel='stylesheet', href='/css/bootstrap-2.0.4.min.css')
+		link(rel='stylesheet', href='/css/style.css')
+		//- Le HTML5 shim, for IE6-8 support of HTML5 elements
+		//if lt IE 9
+			script(src='http://html5shim.googlecode.com/svn/trunk/html5.js')
+		script(type='text/javascript', src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
+		script(type='text/javascript', src='/js/d3.v2.min.js')
+		//-
+			script(type='text/javascript')
+				$(document).ready(function() {
+					//initialize();
+				});
+	body
+		div.navbar.navbar-fixed-top
+			div.navbar-inner
+				div.container
+					a.brand(href='/') eagerfeet
+					ul.nav
+						li.active
+							a(href='/') Home
+						li
+							a(href='http://blog.eagerfeet.org/') blog
+		!= body
+		//- Tracking code, please remove if you use this somewhere else!
+		script(src='http://static.getclicky.com/js', type='text/javascript')
+		script(type='text/javascript') try{ clicky.init(66409777); }catch(e){}
+		noscript
+			p
+				img(alt='Clicky', width='1', height='1', src="http://in.getclicky.com/66409777ns.gif')
+		script(type='text/javascript')
+			| var _gauges = _gauges || [];
+			| (function() {
+			| 	var t   = document.createElement('script');
+			| 	t.type  = 'text/javascript';
+			| 	t.async = true;
+			| 	t.id    = 'gauges-tracker';
+			| 	t.setAttribute('data-site-id', '4ef430c8613f5d6715000004');
+			| 	t.src = '//secure.gaug.es/track.js';
+			| 	var s = document.getElementsByTagName('script')[0];
+			| 	s.parentNode.insertBefore(t, s);
+			| })();
+		//- End of tracking code

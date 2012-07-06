@@ -1,16 +1,6 @@
-/eagerfeet.esproj
 .DS_Store
-/site/data/*
 /eagerfeet-log.txt
-test/testdata.txt
-site/eagerfeet-header.*
-site/mapfoot*
 /test
-runs.db
-rk-config.js
-
 db-conf.js
-
 header.acorn
-
-site/header.png
+status.log
