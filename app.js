@@ -13,7 +13,7 @@ var express = require('express')
 
 var MemcachedStore = require('connect-memcached')(express);
 
-//var dbClient = mysql.createClient(dbConf);
+var dbClient = mysql.createClient(dbConf);
 
 var log = jog(new jog.FileStore('status.log'));
 
@@ -26,10 +26,11 @@ var PORT = 5555;
 app.configure(function(){
 	app.set('views', __dirname + '/views');
 	app.set('view engine', 'jade');
+	app.set('view options', { layout: false });
 	app.use(express.bodyParser());
 	app.use(express.methodOverride());
 	app.use(express.cookieParser());
-	app.use(express.session({secret: 'Run, Forrest, run!', store: new MemcachedStore}));
+	app.use(express.session({secret: 'Run, Forrest, run!', maxAge: 30 * 24 * 60 * 60 * 1000 , store: new MemcachedStore}));
 	app.use(app.router);
 	app.use(express.static(__dirname + '/static'));
 });
@@ -42,17 +43,21 @@ app.configure('production', function(){
 	app.use(express.errorHandler());
 });
 
+
 // Routes
-
-
 
 app.get('/', routes.index);
 
 app.get('/index-login', routes.index_login);
 
-//app.get('/nike-login', nikeLogin);
+app.get('/nike-login', function(req, res){
+	req.session.userID = user.newUser(dbClient, req.session.userID || -1,
+							req.query.nuid, req.query.oauth_token, req.query.access_token).userID;
+//    res.end(JSON.stringify(req.query)+'\n'+JSON.stringify(req.session));
+	routes.redirectLogin(req, res);
+});
 
-//user.loadUsers(dbClient);
+user.loadUsers(dbClient);
 
 app.listen(PORT, function(){
 	console.log("Express server listening on port %d", PORT);

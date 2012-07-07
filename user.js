@@ -1,5 +1,5 @@
 
-var users = [];
+var users = {};
 
 var maxUserID = 1000;
 
@@ -15,5 +15,16 @@ exports.loadUsers = function(dbClient) {
 			});
 		}
 	});
+}
+
+exports.newUser = function(dbClient, userID, nikeUID, nikeOAuthToken, nikeAccessToken) {
+	if (userID < 0) {
+		userID = maxUserID;
+		maxUserID += 1;
+	}
+	var user = {userID: userID};
+	dbClient.query('replace into Users values (?,?,?,?);', [user.userID, nikeUID, nikeOAuthToken, nikeAccessToken]);
+	users[userID] = user;
+	return user;
 }
 
