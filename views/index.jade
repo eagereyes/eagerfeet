@@ -1,28 +1,22 @@
 extends layout
 
-block append content
-	div.container
-		div.row
-			div.logo.span12
-				img(src='/img/header.png', width='820', height='110')
-		div.row
-			div.span8
-				h1 Welcome to #{title}!
-				if (login)
-					if (userID != 'nobody')
-						p User #{userID}
-					div.nike-login
-						script(id="nikeoauth",
-							data-clientid="54dff1e61f4ac4a56c98ad57ef3ed377",
-							data-userid="#{userID}",
-							src="https://www.nike.com/profile/assets/oauth/js/nikeoauth.min.js")
-					div#runs
-				else
-					p This site is currently being rewritten from scratch to work with Nike's new authenticaton scheme and to make it easier to add more features later. Please 
-						a(href='http://blog.eagerfeet.org/')
-							| check out the blog
-						|  or 
-						a(href='http://twitter.com/eagerfeet')
-							| follow me on twitter 
-						| for updates.
-					p The login issues are largely solved, but I am struggling with some other parts of the site's backend right now (and lack of time). I will post on the blog and on Twitter when the new site is ready for you to test. Please bear with me a few more days, the site will be back soon.
+block append main
+	div.row
+		div.logo.span12
+			img(src='/img/header.png', width='820', height='110')
+	div.row
+		div.span8
+			h1 Welcome to eagerfeet, Limited Preview Edition!
+			p Please use the button below to log in using your Nike+ credentials. Once logged in, you will see a list of your most recent runs. You will not be able to actually export those runs at this point, but you will be in a few days.
+			p For more details and updates, 
+				a(href='http://blog.eagerfeet.org/')
+					| check out the blog
+				|  or 
+				a(href='http://twitter.com/eagerfeet')
+					| follow me on twitter
+				| .
+			div.nike-login
+				script(id="nikeoauth",
+					data-clientid="54dff1e61f4ac4a56c98ad57ef3ed377",
+					data-userid="nobody",
+					src="https://www.nike.com/profile/assets/oauth/js/nikeoauth.min.js")

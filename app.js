@@ -4,7 +4,7 @@
  */
 
 var express = require('express')
-	, jog = require('jog')
+	, queue = require('queue-async')
 	, mysql = require('mysql')
 	, user = require('./user.js')
 	, run = require('./run.js')
@@ -14,8 +14,6 @@ var express = require('express')
 var MemcachedStore = require('connect-memcached')(express);
 
 var dbClient = mysql.createClient(dbConf);
-
-var log = jog(new jog.FileStore('status.log'));
 
 var app = module.exports = express.createServer();
 
@@ -48,13 +46,17 @@ app.configure('production', function(){
 
 app.get('/', routes.index);
 
-app.get('/index-login', routes.index_login);
-
-app.get('/nike-login', function(req, res){
-	req.session.userID = user.newUser(dbClient, req.session.userID || -1,
-							req.query.nuid, req.query.oauth_token, req.query.access_token).userID;
-//    res.end(JSON.stringify(req.query)+'\n'+JSON.stringify(req.session));
+app.get('/nike-login', function(req, res) {
+	req.session.userID = user.login(dbClient, req.query.nuid, req.query.oauth_token, req.query.access_token);
 	routes.redirectLogin(req, res);
+});
+
+app.get('/export', function(req, res) {
+	if (req.session.userID == undefined) {
+		res.render('redirect', { title: 'Redirecting ...', redirectURL: 'http://eagerfeet.org/'})
+	} else {
+		user.getActivities(req.session.userID, res);
+	}
 });
 
 user.loadUsers(dbClient);

@@ -1,0 +1,20 @@
+extends layout
+
+block append main
+	div.row
+		div.span8
+			h1 Export
+
+			p A list of your runs on Nike+ (only shows the 100 most recent for now):
+			div#runs
+				ul
+					each run in activities
+						li.run #{run.activity.name}, 
+							- var miles = (run.activity.metrics.totalDistance/1.609344).toFixed(2)
+							- var kms = run.activity.metrics.totalDistance.toFixed(2)
+							| #{miles} mi / #{kms} km in #{run.time}, #{run.activity.metrics.totalCalories} calories 
+							if run.activity.metrics.averageHeartRate > 0
+								i.icon-heart
+//			p Checking for new runs ...
+//			div#progressbar.progress.progress-striped.active
+//				div.bar(style="width: 100%;")

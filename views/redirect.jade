@@ -1,7 +1,8 @@
 extends layout
 
-block head
+block header
 	meta(http-equiv='Refresh', content='0; url=#{redirectURL}')
 
 block content
-	h1 Login successful, hooray!
+	div.container
+		h1 #{title}

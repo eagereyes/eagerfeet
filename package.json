@@ -4,10 +4,9 @@
   , "private": true
   , "dependencies": {
       "express": ">= 2.5.9"
-    , "jade": ">= 0.0.1"
+    , "jade": ">= 0.26.0"
     , "mysql": ">= 0.9.6"
-    , "jog": ">= 0.3.0"
     , "connect-memcached": ">= 0.0.3"
-    , "node-runkeeper": ">= 0.1.4"
+    , "queue-async": ">= 0.0.2"
   }
 }
