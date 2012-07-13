@@ -5,7 +5,11 @@ block append main
 		div.span8
 			h1 Export
 
-			p A list of your runs on Nike+ (only shows the 100 most recent for now):
+			p A list of your runs on Nike+ (only shows the 50 most recent ones for now).
+			//- p If you see a run below that you've deleted on the Nike+ website, please 
+				a(href='mailto:eagerfeet@me.com').
+					send me 
+				| your user ID (#{userID}) and the time of the run.
 			div#runs
 				ul
 					each run in activities
