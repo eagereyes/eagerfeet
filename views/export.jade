@@ -5,20 +5,27 @@ block append main
 		div.span8
 			h1 Export
 
-			p A list of your runs on Nike+ (only shows the 50 most recent ones for now).
-			//- p If you see a run below that you've deleted on the Nike+ website, please 
+			p Below is the list of runs on Nike+ that are currently in the database. Please give the server a minute or two to catch up, then reload the page to see your more recent runs.
+			p Please excuse the clunkiness of the page, this will be much nicer and more usable soon.
+			p Also, please check the files and 
 				a(href='mailto:eagerfeet@me.com').
-					send me 
-				| your user ID (#{userID}) and the time of the run.
+					let me know 
+				| if there are issues. The time zone data in the files should be correct, even thought the filenames currently use GMT and the displayed time pretends to be PDT but is really GMT.
 			div#runs
-				ul
-					each run in activities
-						li.run #{run.activity.name}, 
-							- var miles = (run.activity.metrics.totalDistance/1.609344).toFixed(2)
-							- var kms = run.activity.metrics.totalDistance.toFixed(2)
-							| #{miles} mi / #{kms} km in #{run.time}, #{run.activity.metrics.totalCalories} calories 
-							if run.activity.metrics.averageHeartRate > 0
-								i.icon-heart
+				if activities.length > 0
+					ul
+						each run in activities
+							li.run Run #{run.startTimeUTC}, 
+								- var miles = (run.distance/1609.344).toFixed(2)
+								- var kms = (run.distance/1000).toFixed(2)
+								| #{miles} mi / #{kms} km in #{run.time}, #{run.calories} calories 
+								if run.hasHRData == 'yes'
+									i.icon-heart
+							if run.hasGPSData == 'yes'
+								a(href='/export-gpx/#{run.runID}') Export GPX File
+				else
+					p
+						b No runs yet, which means that fetching your data will take some time. Please give the server a few minutes before reloading!
 //			p Checking for new runs ...
 //			div#progressbar.progress.progress-striped.active
 //				div.bar(style="width: 100%;")

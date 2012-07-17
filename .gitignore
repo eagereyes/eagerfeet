@@ -1,6 +1,5 @@
 .DS_Store
-/eagerfeet-log.txt
-/test
+/data
 db-conf.js
 header.acorn
 status.log

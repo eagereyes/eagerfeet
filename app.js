@@ -58,7 +58,11 @@ app.get('/export', function(req, res) {
 	}
 });
 
-// Impersonate a user. This is obviously only possible on my development machine
+app.get('/export-gpx/:runID', function(req, res) {
+	run.exportGPX(req, res, req.params.runID);
+});
+
+// Impersonate a user, for testing. This is obviously only possible on my development machine
 app.get('/impersonate/:uid', function(req, res) {
 	if ('localhost:5555' == req.headers.host) {
 		req.session.userID = req.params.uid;
