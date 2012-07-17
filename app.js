@@ -7,12 +7,12 @@ var express = require('express')
 	, mysql = require('mysql')
 	, user = require('./user.js')
 	, run = require('./run.js')
-	, dbConf = require('./db-conf.js').conf
+	, conf = require('./conf.js')
 	, routes = require('./routes.js');
 
 var MemcachedStore = require('connect-memcached')(express);
 
-var dbClient = mysql.createClient(dbConf);
+var dbClient = mysql.createClient(conf.dbConf);
 
 var app = module.exports = express.createServer();
 
@@ -43,7 +43,9 @@ app.configure('production', function(){
 
 // Routes
 
-app.get('/', routes.index);
+app.get('/', function(req, res) {
+	routes.index(req, res, conf.nikeClientID);
+});
 
 app.get('/nike-login', function(req, res) {
 	req.session.userID = user.login(dbClient, req.query.nuid, req.query.oauth_token, req.query.access_token);

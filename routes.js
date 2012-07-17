@@ -3,11 +3,11 @@
  * GET home page.
  */
 
-exports.index = function(req, res){
+exports.index = function(req, res, nikeClientID){
 	if (req.session.userID != undefined) {
 		res.render('redirect', { title: 'Redirecting ...', redirectURL: '/export'})
 	} else {
-		res.render('index', { title: 'eagerfeet'})
+		res.render('index', { title: 'eagerfeet', nikeClientID: nikeClientID})
 	}
 };
 

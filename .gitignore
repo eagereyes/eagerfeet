@@ -1,5 +1,5 @@
 .DS_Store
 /data
-db-conf.js
+conf.js
 header.acorn
 *.log
