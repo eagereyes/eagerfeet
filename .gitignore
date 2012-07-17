@@ -2,4 +2,4 @@
 /data
 db-conf.js
 header.acorn
-status.log
+*.log
