@@ -7,17 +7,6 @@ function pad(n) {
 	return n < 10 ? '0' + n : n;
 }
 
-// modified from https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Date
-function ISODateString(d, timeZone) {
-	return d.getUTCFullYear() + '-'
-	    + pad(d.getUTCMonth() + 1) + '-'
-	    + pad(d.getUTCDate()) + 'T'
-	    + pad(d.getUTCHours()) + ':'
-	    + pad(d.getUTCMinutes()) + ':'
-	    + pad(d.getUTCSeconds())
-	    + timeZone;
-}
-
 function fileNameDateString(d) {
 	return d.getUTCFullYear() + '' + pad(d.getUTCMonth() + 1) + '' + pad(d.getUTCDate()) + '-'
 		+ pad(d.getUTCHours()) + '' + pad(d.getUTCMinutes()) + '' + pad(d.getUTCSeconds());
@@ -40,15 +29,9 @@ function createGPX(userID, runID, callback) {
 		gpxNode.att('xsi:schemaLocation', 'http://www.topografix.com/GPX/1/1 http://www.topografix.com/gpx/1/1/gpx.xsd\n'+
 			'http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd');
 
-		var time = new Date(runInfo.startTimeUTC);
-		var timeOffset = parseFloat(runInfo.timeZone.substr(1,3))+runInfo.timeZone.substr(4,2)/60;
-		if (runInfo.timeZone[0] == '-') {
-			timeOffset = -timeOffset;
-		}
+		var time = new Date(runInfo.startTime);
 
-		time.setTime(time.getTime()+timeOffset*3600000);
-
-		var runName = 'Run '+time;
+		var runName = 'Run '+runInfo.startTime;
 	
 		var metadata = gpxNode.ele('metadata');
 		metadata.ele('name').txt(runName);
@@ -62,7 +45,7 @@ function createGPX(userID, runID, callback) {
 		var trk = gpxNode.ele('trk');
 	
 		trk.ele('name').txt(runName);
-		trk.ele('time').txt(runInfo.startTimeUTC);
+		trk.ele('time').txt(runInfo.startTime);
 		trk.ele('type').txt('Run');
 
 		var deltaTime = runInfo.duration*1000/runInfo.deltaLons.length;
@@ -91,7 +74,7 @@ function createGPX(userID, runID, callback) {
 
 			trkPt.ele('ele').txt(''+ele);
 
-			trkPt.ele('time').txt(ISODateString(time, runInfo.timeZone));
+			trkPt.ele('time').txt(time.toISOString());
 
 			if (heartrates) {
 				var previousIndex = hrIndex;
@@ -110,12 +93,13 @@ function createGPX(userID, runID, callback) {
 			time.setTime(time.getTime()+deltaTime);
 		}
 		
-		callback(gpxDoc.toString(), 'Run-'+fileNameDateString(new Date(runInfo.startTimeUTC))+'.gpx');
+		callback(gpxDoc.toString(), 'Run-'+fileNameDateString(new Date(runInfo.startTime))+'.gpx');
 	});
 }
 
-function exportGPX(req, res, runID) {
+function exportGPX(req, res, runID, dbClient) {
 	createGPX(req.session.userID, runID, function(gpx, fileName) {
+		dbClient.query('update Runs set exported = "yes" where runID = ?', [runID]);
 		res.setHeader('Content-Disposition', 'attachment; filename='+fileName);
 		res.setHeader('Content-Type', 'application/gpx+xml');
 		res.send(gpx);

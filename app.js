@@ -61,12 +61,16 @@ app.get('/export', function(req, res) {
 });
 
 app.get('/export-gpx/:runID', function(req, res) {
-	run.exportGPX(req, res, req.params.runID);
+	run.exportGPX(req, res, req.params.runID, dbClient);
+});
+
+app.get('/updateRunList', function(req, res) {
+	user.updateRunList(req.session.userID, res);
 });
 
 // Impersonate a user, for testing. This is obviously only possible on my development machine
 app.get('/impersonate/:uid', function(req, res) {
-	if ('localhost:5555' == req.headers.host) {
+	if (conf.stagingServer) {
 		req.session.userID = req.params.uid;
 	}
 	res.render('redirect', {title: 'Redirecting ...', redirectURL: 'http://localhost:5555/'})
@@ -75,5 +79,5 @@ app.get('/impersonate/:uid', function(req, res) {
 user.loadUsers(dbClient);
 
 app.listen(PORT, function(){
-	console.log("Express server listening on port %d", PORT);
+	console.log("eagerfeet server listening on port %d", PORT);
 });

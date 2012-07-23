@@ -5,3 +5,5 @@ exports.conf = {
 }
 
 exports.nikeClientID = '<Nike+ Client ID>';
+
+exports.stagingServer = true;
