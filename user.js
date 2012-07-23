@@ -163,7 +163,11 @@ function retrieveRunGPSData(dbClient, dbQueue, user, runID, run, done) {
 			var hasGPS = 'no';
 			try  {
 				var runData = JSON.parse(body).activity;
-				hasGPS = (runData.hasOwnProperty('geo')?'yes':'no');
+				if (runData.hasOwnProperty('geo') && runData.geo.hasOwnProperty('waypoints')) {
+					hasGPS = 'yes';
+				} else {
+					hasGPS = 'no';
+				}
 			} catch (error) {
 //				console.log(body);
 				console.log(runID+': '+error);
