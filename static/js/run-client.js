@@ -71,6 +71,47 @@ function setUnit(newUnit) {
 */
 }
 
+function toggleUnits() {
+	if (unit == 'km') {
+		setUnit('mi');
+	} else {
+		setUnit('km');
+	}
+	document.location.reload(true);
+}
+
+function downloadGPX(runID) {
+	window.location = window.location.origin+'/export-gpx/'+runID;
+	d3.select('a#download-'+runID).classed('btn-info', false);
+	d3.select('a#download-'+runID).select('i').classed('icon-white', false);
+}
+
+function makeDownloadButton(run) {
+	var html = '<div class="downloadbtn">';
+	if (run.hasGPSData == 'yes') {
+/* 		html += '<div class="btn-group">'; */
+		html += '<a id="download-'+run.runID+'" class="btn btn-small';
+		html += (run.exported=='no')?' btn-info':'';
+		html += '" href="javascript:downloadGPX(\''+run.runID+'\');">Download GPX';
+		if (run.hasHRData == 'yes') {
+			html += '+<i class="icon-heart '+((run.exported=='no')?'icon-white':'')+'"></i>';
+		}
+		html += '</a>';
+/*
+		html += '<button class="btn dropdown-toggle';
+		html += (run.exported == 'no')?' btn-info':'';
+		html += '" data-toggle="dropdown"><span class="caret"></span></button>';
+		html += '</div></div>';
+*/
+		html += '</div>';
+	} else if (run.hasGPSData == 'no') {
+		html += '<p><small>(no GPS data)</small></p></div>';
+  	} else {
+		html += '<p><small>(error checking for GPS data)</small></p></div>'
+	}
+	return html;
+}
+
 function makeRunList() {
 	// not very elegant, but solves the problem that runs are otherwise inserted out-of-order
 	$('div#run-list').html('');
@@ -79,9 +120,7 @@ function makeRunList() {
 		.enter().append('div')
 		.attr('id', function(run) { return run.runID; })
 		.classed('run', true)
-		.html(function(run) { return '<div class="downloadbtn">'
-								+ ((run.hasGPSData=='yes')?'<a class="btn btn-small '+((run.exported=='no')?'btn-info':'')+'" href="/export-gpx/'+run.runID+'">Download GPX'+((run.hasHRData=='yes')?'+<i class="icon-heart '+((run.exported=='no')?'icon-white':'')+'"></i>':'')+'</a>':'<p><small>'+((run.hasGPSData=='no')?'(no GPS data)':'(error checking for GPS data)')+'</small></p>')
-								+'</div>'
+		.html(function(run) { return makeDownloadButton(run)
 								+ '<p><b>'+formatDate(run.startTime) + '</b> at ' + formatTime(run.startTime) + ', '
 								+ formatDistance(run.distance) + ', '
 								+ formatDuration(run.duration) + ' ';

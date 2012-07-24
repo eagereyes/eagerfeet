@@ -47,6 +47,11 @@ app.get('/', function(req, res) {
 	routes.index(req, res, conf.nikeClientID);
 });
 
+app.get('/logout', function(req, res) {
+	delete(req.session.userID);
+	res.render('redirect', {title: 'Redirecting ...', redirectURL: '/'})
+});
+
 app.get('/nike-login', function(req, res) {
 	req.session.userID = user.login(dbClient, req.query.nuid, req.query.oauth_token, req.query.access_token);
 	routes.redirectLogin(req, res);
@@ -54,7 +59,7 @@ app.get('/nike-login', function(req, res) {
 
 app.get('/export', function(req, res) {
 	if (req.session.userID == undefined) {
-		res.render('redirect', {title: 'Redirecting ...', redirectURL: 'http://eagerfeet.org/'})
+		res.render('redirect', {title: 'Redirecting ...', redirectURL: '/'})
 	} else {
 		user.getActivities(dbClient, req.session.userID, res);
 	}
@@ -73,7 +78,7 @@ app.get('/impersonate/:uid', function(req, res) {
 	if (conf.stagingServer) {
 		req.session.userID = req.params.uid;
 	}
-	res.render('redirect', {title: 'Redirecting ...', redirectURL: 'http://localhost:5555/'})
+	res.render('redirect', {title: 'Redirecting ...', redirectURL: 'http://localhost:5555/export'})
 });
 
 user.loadUsers(dbClient);

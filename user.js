@@ -170,7 +170,7 @@ function retrieveRunGPSData(dbClient, dbQueue, user, runID, run, done) {
 				}
 			} catch (error) {
 //				console.log(body);
-				console.log(runID+': '+error);
+//				console.log(runID+': '+error);
 				hasGPS = 'err';
 /*
 				if (body.indexOf('ENCOUNTERED') > 0) {
@@ -180,7 +180,7 @@ function retrieveRunGPSData(dbClient, dbQueue, user, runID, run, done) {
 */
 			}
 			dbClient.query('update Runs set hasGPSData = ? where runID = ?', [hasGPS, runID]);
-			console.log(run.activityId+':'+hasGPS);
+//			console.log(run.activityId+':'+hasGPS);
 			if (hasGPS == 'yes') {
 
 				var runInfo = convertRunData(runID, runData);
@@ -193,7 +193,7 @@ function retrieveRunGPSData(dbClient, dbQueue, user, runID, run, done) {
 					fs.writeFile(DATADIR+user.userID+'/'+runID+'.json.gz', compressedRun);
 				});
 				
-				console.log(runInfo.deltaLats.length+' waypoints for run '+runID);			
+//				console.log(runInfo.deltaLats.length+' waypoints for run '+runID);			
 				dbClient.query('update Runs set minLat = ?, maxLat = ?, minLon = ?, maxLon = ? where runID = ?',
 							[runInfo.minLat, runInfo.maxLat, runInfo.minLon, runInfo.maxLon, runID]);
 			}
@@ -240,7 +240,7 @@ function saveRunsToDB(dbClient, user, dbQueue, data, offset) {
 	} else {
 		dbQueue.await(function() {
 			user.done = true;
-			console.log('Done with user '+user.userID);
+//			console.log('Done with user '+user.userID);
 		});
 	}
 }
@@ -260,7 +260,7 @@ exports.getActivities = function(dbClient, userID, res) {
 
 		activities.sort(function(a, b) { return b.startTime - a.startTime; });
 
-		res.render('export', {activities: activities, userID: userID});
+		res.render('export', {activities: activities, userID: userID, active: 'export'});
 
 		user.done = false;
 		user.runs = [];

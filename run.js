@@ -98,12 +98,17 @@ function createGPX(userID, runID, callback) {
 }
 
 function exportGPX(req, res, runID, dbClient) {
-	createGPX(req.session.userID, runID, function(gpx, fileName) {
-		dbClient.query('update Runs set exported = "yes" where runID = ?', [runID]);
-		res.setHeader('Content-Disposition', 'attachment; filename='+fileName);
-		res.setHeader('Content-Type', 'application/gpx+xml');
-		res.send(gpx);
-	});
+	if (req.session.userID == 'undefined') {
+		res.send('Run not found.');
+		console.log('no session when trying to export run '+runID);
+	} else {
+		createGPX(req.session.userID, runID, function(gpx, fileName) {
+			dbClient.query('update Runs set exported = "yes" where runID = ?', [runID]);
+			res.setHeader('Content-Disposition', 'attachment; filename='+fileName);
+			res.setHeader('Content-Type', 'application/gpx+xml');
+			res.send(gpx);
+		});
+	}
 }
 
 exports.exportGPX = exportGPX;

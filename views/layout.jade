@@ -12,6 +12,9 @@ html(lang="en")
 				script(src='http://html5shim.googlecode.com/svn/trunk/html5.js')
 			script(type='text/javascript', src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
 			script(type='text/javascript', src='/js/d3.v2.min.js')
+			script(type='text/javascript', src='/js/bootstrap-dropdown-2.0.4.js')
+			script(type='text/javascript')
+				$(document).ready(function() { $('.dropdown-toggle').dropdown(); });
 
 	body
 		block content
@@ -20,10 +23,32 @@ html(lang="en")
 					div.container
 						a.brand(href='/') eagerfeet
 						ul.nav
-							li.active
-								a(href='/') Home
+							if (active == 'home')
+								li.active
+									a(href='/') Home
+							else
+								li
+									a(href='/') Home
+							if (active == 'export')
+								li.active
+									a(href='/export') Export
+							else
+								li
+									a(href='/export') Export
 							li
-								a(href='http://blog.eagerfeet.org/') blog
+								a(href='http://blog.eagerfeet.org/') Blog
+						if (userID != undefined)
+							ul.nav.pull-right
+								li.dropdown
+									a.dropdown-toggle(href='#', data-toggle='dropdown') User Tools
+										b.caret
+									ul.dropdown-menu
+										li
+											a(href='javascript:toggleUnits();') Toggle mi/km
+										li.divider
+										li
+											a(href='/logout') Logout
+
 			div.container
 				block main
 
@@ -46,3 +71,4 @@ html(lang="en")
 				s.parentNode.insertBefore(t, s);
 				})();
 			//- End of tracking code
+			
