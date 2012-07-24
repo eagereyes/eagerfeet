@@ -122,7 +122,7 @@ function makeRunList() {
 function updateRunList() {
 	makeRunList();
 	setTimeout(function() {
-		d3.json(window.location.origin+'/updateRunList', function(data) {
+		d3.json('/updateRunList', function(data) {
 			data.newRuns.forEach(function(run) {
 				run.startTime = new Date(run.startTime);
 			});
