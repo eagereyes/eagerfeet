@@ -81,7 +81,7 @@ function toggleUnits() {
 }
 
 function downloadGPX(runID) {
-	window.location = window.location.origin+'/export-gpx/'+runID;
+	window.location = '/export-gpx/'+runID;
 	d3.select('a#download-'+runID).classed('btn-info', false);
 	d3.select('a#download-'+runID).select('i').classed('icon-white', false);
 }
@@ -89,21 +89,13 @@ function downloadGPX(runID) {
 function makeDownloadButton(run) {
 	var html = '<div class="downloadbtn">';
 	if (run.hasGPSData == 'yes') {
-/* 		html += '<div class="btn-group">'; */
 		html += '<a id="download-'+run.runID+'" class="btn btn-small';
 		html += (run.exported=='no')?' btn-info':'';
 		html += '" href="javascript:downloadGPX(\''+run.runID+'\');">Download GPX';
 		if (run.hasHRData == 'yes') {
 			html += '+<i class="icon-heart '+((run.exported=='no')?'icon-white':'')+'"></i>';
 		}
-		html += '</a>';
-/*
-		html += '<button class="btn dropdown-toggle';
-		html += (run.exported == 'no')?' btn-info':'';
-		html += '" data-toggle="dropdown"><span class="caret"></span></button>';
-		html += '</div></div>';
-*/
-		html += '</div>';
+		html += '</a></div>';
 	} else if (run.hasGPSData == 'no') {
 		html += '<p><small>(no GPS data)</small></p></div>';
   	} else {
