@@ -1,5 +1,16 @@
 extends layout
 
+block append header
+	script(type='text/javascript')
+		$(document).ready(function() {
+			if ($.browser.msie) {
+				if ($.browser.version < 9) {
+					$('div#nike-login').hide();
+					$('div#browser-update').show();
+				}
+			}
+		});
+
 block append main
 	div.row
 		div.logo.span12
@@ -16,8 +27,16 @@ block append main
 				a(href='http://twitter.com/eagerfeet')
 					| follow me on twitter
 				| .
-			div.nike-login
+
+			div#nike-login
 				script(id='nikeoauth',
 					data-clientid='#{nikeClientID}',
 					data-userid='nobody',
 					src='https://www.nike.com/profile/assets/oauth/js/nikeoauth.min.js')
+
+			div#browser-update
+				h1 Your web browser is not supported!
+				p This is a small project run by a single person. I cannot test every change with outdated browsers or work around their myriad little problems. Please 
+					a(href='http://browser-update.org/update.html')
+						| download a modern browser
+					|!

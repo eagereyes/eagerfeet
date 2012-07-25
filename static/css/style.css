@@ -27,3 +27,9 @@ div.run {
 div.downloadbtn {
 	float: right;
 }
+
+div#browser-update {
+	background-color: #fffacc;
+	padding: 10px;
+	display: none;
+}
