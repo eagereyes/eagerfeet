@@ -29,7 +29,5 @@ div.downloadbtn {
 }
 
 div#browser-update {
-	background-color: #fffacc;
-	padding: 10px;
 	display: none;
 }
