@@ -96,10 +96,15 @@ function makeDownloadButton(run) {
 			html += '+<i class="icon-heart '+((run.exported=='no')?'icon-white':'')+'"></i>';
 		}
 		html += '</a></div>';
+/*
 	} else if (run.hasGPSData == 'no') {
 		html += '<p><small>(no GPS data)</small></p></div>';
   	} else {
 		html += '<p><small>(error checking for GPS data)</small></p></div>'
+	}
+*/
+	} else {
+		html += '</div>';
 	}
 	return html;
 }

@@ -231,17 +231,28 @@ function saveRunsToDB(dbClient, user, dbQueue, data, offset) {
 		dbClient.query('replace into Runs (runID, userID, startTime, distance, duration, hasHRData, calories, externalID) values (?,?,?,?,?,?,?,?)',
 						[runID, user.userID, run.startTimeUtc, Math.round(run.metrics.totalDistance*1000), Math.round(run.metrics.totalDuration/1000),
 						 (hasHRData)?'yes':'no', run.metrics.totalCalories, run.activityId]);
-		dbQueue.defer(retrieveRunGPSData, dbClient, dbQueue, user, runID, run);
+		user.runs.push({
+			runID:		run.runID,
+			startTime:	run.startTimeUtc,
+			distance:	Math.round(run.metrics.totalDistance*1000),
+			duration:	Math.round(run.metrics.totalDuration/1000),
+			hasHRData:	((run.metrics.hasOwnProperty('averageHeartRate') && (run.metrics.averageHeartRate != 0)))?'yes':'no',
+			hasGPSData:	'no',
+			calories:	run.metrics.totalCalories,
+			externalID:	run.activityId,
+			exported:	'no'
+		});
+//		dbQueue.defer(retrieveRunGPSData, dbClient, dbQueue, user, runID, run);
 	});
 	if (activities.length > 0 && offset >= 0) {
 		serverRequest('/partner/sport/run/activities', {access_token: user.nikeAccessToken, start: offset+NUMACTIVITIES, end: offset+NUMACTIVITIES+NUMACTIVITIES}, function(data) {
 			saveRunsToDB(dbClient, user, dbQueue, data, offset+NUMACTIVITIES);
 		});
 	} else {
-		dbQueue.await(function() {
+//		dbQueue.await(function() {
 			user.done = true;
 //			console.log('Done with user '+user.userID);
-		});
+//		});
 	}
 }
 
